@@ -3,7 +3,7 @@
 Word (.docx) → LaTeX manuscript typesetting with author-in-the-loop proofreading, for
 journals and conferences whose authors write in Word and whose production runs on LaTeX.
 
-[![CI](https://github.com/YOUR-GITHUB-USER/wordtex/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR-GITHUB-USER/wordtex/actions)
+[![CI](https://github.com/SHELLY000/wordtolatexZL/actions/workflows/ci.yml/badge.svg)](https://github.com/SHELLY000/wordtolatexZL/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 <!-- [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX) -->
 
@@ -38,8 +38,8 @@ Nothing to install for the web app: download `wordtex_studio.html` from the late
 and open it. For the headless runner, tests and builds:
 
 ```bash
-git clone https://github.com/YOUR-GITHUB-USER/wordtex
-cd wordtex && npm ci
+git clone https://github.com/SHELLY000/wordtolatexZL
+cd wordtolatexZL && npm ci
 npm run build        # -> wordtex_studio.html
 npm test             # 26 unit + pipeline tests (needs Node 18+)
 ```

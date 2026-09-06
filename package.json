@@ -5,7 +5,7 @@
   "license": "MIT",
   "author": "Li Zhou <20200122@wbu.edu.cn> (https://orcid.org/0000-0002-4024-2552)",
   "private": true,
-  "repository": { "type": "git", "url": "https://github.com/YOUR-GITHUB-USER/wordtex" },
+  "repository": { "type": "git", "url": "https://github.com/SHELLY000/wordtolatexZL" },
   "scripts": {
     "build": "node scripts/build.js",
     "test": "node --test tests/*.test.js",

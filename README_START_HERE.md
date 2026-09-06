@@ -41,5 +41,4 @@ node scripts/regression.js manuscripts/ --compile                    # 批量回
 
 ## 发布前请改的地方
 
-- `README.md`、`package.json`、`CITATION.cff` 里的 `YOUR-GITHUB-USER`（改成你的 GitHub 用户名）；
 - 第一次发布后在 Zenodo 取 DOI，填回 `CITATION.cff` 和 README 的徽章。

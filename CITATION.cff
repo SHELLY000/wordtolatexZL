@@ -15,8 +15,8 @@ type: software
 version: "0.2.0"
 date-released: "2026-09-06"
 license: MIT
-repository-code: "https://github.com/YOUR-GITHUB-USER/wordtex"
-url: "https://github.com/YOUR-GITHUB-USER/wordtex"
+repository-code: "https://github.com/SHELLY000/wordtolatexZL"
+url: "https://github.com/SHELLY000/wordtolatexZL"
 # doi: "10.5281/zenodo.XXXXXXX"          # add after the first Zenodo release
 keywords:
   - Word to LaTeX
