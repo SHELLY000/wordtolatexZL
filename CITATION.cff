@@ -1,0 +1,53 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite both the software and the paper below."
+title: "WordTeX: Word-to-LaTeX manuscript typesetting with author-in-the-loop proofreading"
+abstract: >-
+  WordTeX converts Word (.docx) manuscripts into compilable LaTeX projects for
+  journal and conference submission systems. It converts Word equations (OMML)
+  to LaTeX, maps template heading styles and manually formatted headings to
+  section levels, renders merged table cells, links in-text citations to the
+  reference list, and degrades unconvertible content (legacy equation-editor
+  objects, native charts, metafile images) to visible placeholders so that the
+  exported project always compiles. A single-file offline web application lets
+  authors who do not know LaTeX proofread and correct every recognised block,
+  including equations, before the project is handed to the editorial office.
+type: software
+version: "0.2.0"
+date-released: "2026-09-06"
+license: MIT
+repository-code: "https://github.com/YOUR-GITHUB-USER/wordtex"
+url: "https://github.com/YOUR-GITHUB-USER/wordtex"
+# doi: "10.5281/zenodo.XXXXXXX"          # add after the first Zenodo release
+keywords:
+  - Word to LaTeX
+  - document conversion
+  - scholarly publishing
+  - manuscript submission
+  - typesetting
+  - OMML
+  - JavaScript
+authors:
+  - family-names: "Zhou"
+    given-names: "Li"
+    affiliation: "School of Economics, Wuhan Business University, Wuhan 430056, Hubei, China"
+    orcid: "https://orcid.org/0000-0002-4024-2552"
+contact:
+  - family-names: "Zhou"
+    given-names: "Li"
+    affiliation: "School of Economics, Wuhan Business University, Wuhan 430056, Hubei, China"
+    orcid: "https://orcid.org/0000-0002-4024-2552"
+    email: "20200122@wbu.edu.cn"
+
+preferred-citation:
+  type: article
+  title: "WordTeX: an author-in-the-loop Word-to-LaTeX typesetting pipeline for small journals and conferences"
+  journal: "SoftwareX"
+  year: 2026
+  # volume: 00
+  # start: "000000"                     # SoftwareX uses article numbers
+  # doi: "10.1016/j.softx.2026.XXXXXX"
+  authors:
+    - family-names: "Zhou"
+      given-names: "Li"
+      affiliation: "School of Economics, Wuhan Business University, Wuhan 430056, Hubei, China"
+      orcid: "https://orcid.org/0000-0002-4024-2552"

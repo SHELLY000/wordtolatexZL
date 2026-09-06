@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / Node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: ["18", "20", "22"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - name: Unit + pipeline tests (build the app, convert the example manuscript headlessly)
+        run: npm test
+
+  build-artifact:
+    name: Build wordtex_studio.html
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wordtex_studio
+          path: wordtex_studio.html
+
+  compile-example:
+    name: Compile the example with XeLaTeX
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends texlive-xetex texlive-latex-extra texlive-fonts-extra texlive-bibtex-extra latexmk
+      - run: npm run build
+      - run: node scripts/regression.js examples/sample_manuscript.docx --compile --out regression_out | tee regression.csv
+      - name: Fail on LaTeX errors
+        run: |
+          tail -n +2 regression.csv | awk -F, '{ if ($3 != "0") { print "LaTeX errors in " $1; exit 1 } }'

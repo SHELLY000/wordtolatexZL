@@ -1,0 +1,8 @@
+node_modules/
+regression_out/
+headless_out/
+build_check.html
+*.log
+.DS_Store
+# Real manuscripts used for local regression runs are not committed (see tests/fixtures/README.md)
+tests/fixtures/*.docx

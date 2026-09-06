@@ -1,0 +1,8 @@
+file,pages,latex_errors,sections,display_eq,inline_eq,tables,multirow,figures,placeholders,cites,bibitems,keywords_chars,notes
+m01_acm_autonumber_equations.docx,10,0,2,0,0,5,0,1,0,0,8,93,"19 headings emitted as list items; 39 OMML equations dropped (table variable names empty); author names polluted with '(Corresponding author)'"
+m02_builtin_styles_footnotes.docx,11,0,24,0,0,1,0,1,0,0,22,137,"'TABLE I.' caption not recognised; typed roman/letter numbers doubled (1 I. Introduction)"
+m03_builtin_styles_authoryear.docx,9,0,16,0,0,1,0,2,0,0,31,124,"author-year citations not linked; running head overlapped"
+m04_acm_typed_numbers_merged_cells.docx,9,0,10,0,0,5,0,0,0,0,12,105,"1 OMML equation dropped; rowspan flattened (Table 1 columns shifted); CJK glyphs missing"
+m05_acm_autonumber_ole_equations.docx,,3,2,0,0,5,0,1,0,0,12,85,"COMPILE FAILED: WMF equation previews passed to \includegraphics; 22 headings emitted as list items"
+m06_bold_headings_native_chart.docx,,1,16,0,0,0,0,0,0,0,0,10292,"COMPILE FAILED: Keywords field swallowed 10,292 characters (sections 1-4, all tables/figures); references heading 'Reference' not recognised; native chart dropped"
+m07_journal_layout_tables_roman.docx,20,0,1,0,0,5,0,3,0,0,45,21,"abstract/keywords not found (inside ARTICLE INFO table); masthead table exported as a data table; all 23 bold headings emitted as paragraphs"
