@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.2 — 2026-09-09
+
+### Added
+- **Bilingual interface.** The page opens in English; the **EN / 中文** switch in the header changes to Simplified
+  Chinese and back at any time, without losing the manuscript or pending edits. The choice is stored in
+  `localStorage["wordtex-lang"]`. All strings live in `src/i18n.js` (`t(key, vars)`, `data-i18n` hooks in the
+  template); manuscript recognition understands both languages regardless of the interface language.
+- `scripts/headless_run.js --lang en|zh` selects the language of the captured checklist and block labels.
+- `tests/i18n.test.js`: both tables complete, placeholders consistent, every template hook and `t()` key defined.
+- `WordTeX_USER_MANUAL.md`: full English user manual (requirements, installation, modules, API, operation guide,
+  validation, troubleshooting, checklist glossary).
+
+### Changed
+- Product name in the interface is now *WordTeX*; the default venue details are unchanged.
+- Chart placeholders embedded in the body take the language active at recognition time.
+
 ## 0.2.1 — 2026-09-09
 
 Code review of the 0.2.0 bundle. Every item below is covered by `tests/regressions.test.js` (a synthetic

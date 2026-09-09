@@ -42,6 +42,7 @@ WordTeX is a single-page application (no server) plus a Node harness that drives
 
 ## Files
 
-- `src/app.js` — application (IIFE); `src/omml2latex.js` — UMD module usable in Node and the browser.
-- `scripts/build.js` — inlines `src/`, `vendor/` (mammoth, JSZip, KaTeX + fonts as data URIs) and the template zip.
+- `src/app.js` — application (IIFE); `src/omml2latex.js` — UMD module usable in Node and the browser;
+  `src/i18n.js` — UMD string table (English default, Chinese), `t(key, vars)` plus `data-i18n*` hooks in the template.
+- `scripts/build.js` — inlines `src/` (including `i18n.js`), `vendor/` (mammoth, JSZip, KaTeX + fonts as data URIs) and the template zip.
 - `scripts/headless_run.js` — jsdom driver used by the tests and the regression script.

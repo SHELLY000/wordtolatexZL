@@ -82,7 +82,7 @@ test("regressions: escaping, citation linking, equation numbers, table images, f
   assert.match(tex, /\\begin\{equation\}\\tag\{1\}\\label\{eq:1\}/);
   // image in a table cell is kept, sized to the cell, without a float environment
   assert.match(tex, /Row & \\includegraphics\[width=\\linewidth,height=[\d.]+pt,keepaspectratio\]\{figures\/word-figure-01\.png\}/);
-  assert.ok(report.checks.some((c) => /表格单元格内/.test(c)), "checklist mentions the table image");
+  assert.ok(report.checks.some((c) => /inside table cells/.test(c)), "checklist mentions the table image");
   // one file per distinct image, labels de-duplicated
   assert.deepEqual(Object.keys(zip.files).filter((f) => /^figures\/.+/.test(f)), ["figures/word-figure-01.png"]);
   assert.match(tex, /\\label\{fig:word-figure-01\}/);

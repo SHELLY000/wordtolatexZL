@@ -1,6 +1,8 @@
 # WordTeX 用户手册 / User manual
 
-（中文为主，English summary at the end.）
+（中文速查。完整英文手册见仓库根目录 `WordTeX_USER_MANUAL.md`。）
+
+界面默认为英文；点页面右上角的 **EN / 中文** 切换为中文，选择会保存在浏览器里。下文按中文界面描述。
 
 ## 1. 界面
 

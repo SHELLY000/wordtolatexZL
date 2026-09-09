@@ -30,6 +30,7 @@ const html = template
   .replace("__STYLES__", () => read("src/styles.css") + "\n" + katexCss)
   .replace("__VENDOR_MAMMOTH__", () => read("vendor/mammoth.browser.min.js"))
   .replace("__VENDOR_JSZIP__", () => read("vendor/jszip.min.js") + "\n" + katexJs)
+  .replace("__I18N__", () => read("src/i18n.js"))
   .replace("__APP__", () => read("src/omml2latex.js") + "\n" + app);
 
 fs.writeFileSync(out, html);

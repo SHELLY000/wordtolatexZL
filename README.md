@@ -41,12 +41,15 @@ and open it. For the headless runner, tests and builds:
 git clone https://github.com/SHELLY000/wordtolatexZL
 cd wordtolatexZL && npm ci
 npm run build        # -> wordtex_studio.html
-npm test             # 30 unit + pipeline + regression tests (needs Node 18+)
+npm test             # 35 unit, interface-string, pipeline and regression tests (needs Node 18+)
 ```
 
 XeLaTeX (TeX Live) is only needed to compile the exported projects.
 
 ## Quick start
+
+The full manual is `WordTeX_USER_MANUAL.md`. The interface is English by default; the **EN / 中文** switch
+in the header changes it to Simplified Chinese.
 
 1. Open `wordtex_studio.html`, fill in the conference/journal details once (they are remembered).
 2. Upload the `.docx`. The left panel lists the recognised title, authors, abstract, keywords
@@ -95,7 +98,7 @@ node scripts/regression.js my_manuscripts/ --compile      # one CSV line per man
 | Equation converter | `src/omml2latex.js` | OMML → LaTeX (fractions, scripts, radicals, n-ary, delimiters, matrices, accents, functions, arrays); placeholder injection into `document.xml` |
 | Pre-processing | `src/app.js` → `preprocessDocx`, `styleMapFromStyles` | rewrites `document.xml`, maps template heading styles (`Head1`… → `h1`…) by `outlineLvl`/`basedOn` |
 | Structure recovery | `src/app.js` → `parseAcademicDocument`, `promoteBoldHeadings`, `unwrapLayoutTables`, `fixRunInHeadings` | title/authors/abstract/keywords, headings from styles or bold text, journal layout tables, captions, references |
-| Review UI | `src/app.js` → `renderContentEditor`, `retagBlock`, `renderMathIn` | block-by-block editing, type drop-down, KaTeX rendering with error marking |
+| Review UI | `src/app.js` → `renderContentEditor`, `retagBlock`, `renderMathIn`; `src/i18n.js` | block-by-block editing, type drop-down, KaTeX rendering with error marking; English / Chinese interface strings |
 | LaTeX generation | `src/app.js` → `buildLatex`, `nodeToLatex`, `tableToLatex`, `imageToLatex`, `linkCitations` | acmart project with `multirow` tables, `xltabular` long tables, float control, `\cite` linking, placeholders |
 | Build & test | `scripts/build.js`, `scripts/headless_run.js`, `scripts/regression.js`, `tests/` | single-file bundle, jsdom runner, regression CSV, unit/pipeline tests |
 | Local auto-compile | `scripts/autocompile/` | folder watchers (Windows PowerShell, macOS/Linux shell) that compile every exported ZIP with XeLaTeX and open the PDF |

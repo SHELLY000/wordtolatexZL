@@ -1,6 +1,6 @@
 {
   "name": "wordtex",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Word (.docx) to LaTeX manuscript typesetting with author-in-the-loop proofreading — equations, tables, figures, citations, ACM template, offline single-file web app",
   "license": "MIT",
   "author": "Li Zhou <20200122@wbu.edu.cn> (https://orcid.org/0000-0002-4024-2552)",

@@ -2,7 +2,7 @@
 /*
  * Run wordtex_studio.html without a browser (jsdom) on one .docx and capture what the app produced.
  *
- *   node scripts/headless_run.js <app.html> <manuscript.docx> <outdir> [--conference "Name" --short "SHORT" --year 2025]
+ *   node scripts/headless_run.js <app.html> <manuscript.docx> <outdir> [--conference "Name" --short "SHORT" --year 2025] [--lang en|zh]
  *
  * Writes to <outdir>:
  *   ui_report.json   title / authors / abstract / keywords / checklist / block labels as shown in the review panel
@@ -22,6 +22,7 @@ const opt = (name, dflt) => { const i = args.indexOf("--" + name); return i >= 0
 const HTML = positional[0] || path.join(__dirname, "..", "wordtex_studio.html");
 const DOCX = positional[1] || path.join(__dirname, "..", "examples", "sample_manuscript.docx");
 const OUT = positional[2] || "./headless_out";
+const LANG = opt("lang", "en");           // interface language of the captured report (checklist, block labels)
 fs.mkdirSync(OUT, { recursive: true });
 
 function pngSize(dataUrl) {
@@ -48,6 +49,7 @@ const dom = new JSDOM(fs.readFileSync(HTML, "utf8"), {
     window.HTMLElement.prototype.scrollIntoView = () => {};
     window.Image = class { constructor() { this.naturalWidth = 0; this.naturalHeight = 0; } set src(v) { this._src = v; const s = pngSize(v); this.naturalWidth = s.w; this.naturalHeight = s.h; setTimeout(() => this.onload && this.onload(), 0); } get src() { return this._src; } };
     window.URL.createObjectURL = (blob) => { captured.push(blob); return "blob:captured"; };
+    try { window.localStorage.setItem("wordtex-lang", LANG); } catch (_) { /* storage unavailable */ }
     window.URL.revokeObjectURL = () => {};
   },
 });
@@ -74,7 +76,7 @@ const val = (id) => (doc.getElementById(id) || {}).value || "";
   const input = doc.getElementById("fileInput");
   Object.defineProperty(input, "files", { value: { 0: file, length: 1, item: () => file }, configurable: true });
   input.dispatchEvent(new window.Event("change", { bubbles: true }));
-  for (let i = 0; i < 300; i++) { await sleep(200); const btn = doc.getElementById("nextBtn"); if (btn && !btn.disabled && !/正在/.test(text("fileMeta"))) break; }
+  for (let i = 0; i < 300; i++) { await sleep(200); const btn = doc.getElementById("nextBtn"); if (btn && !btn.disabled && !/正在|recognising/i.test(text("fileMeta"))) break; }
   await sleep(1200);
 
   const report = {

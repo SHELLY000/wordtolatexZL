@@ -11,63 +11,63 @@
   const ccsStorageKey = "ei-typesetter-ccs-v1";
   // Conference-relevant subset of the ACM CCS 2012 taxonomy (ids/labels taken from the official SKOS file).
   const CCS_OPTIONS = [
-    { group: "生成式 AI 与机器学习", id: "10010147.10010178", desc: "Computing methodologies~Artificial intelligence", label: "Artificial intelligence" },
-    { group: "生成式 AI 与机器学习", id: "10010147.10010178.10010179", desc: "Computing methodologies~Natural language processing", label: "Natural language processing ‹Artificial intelligence›" },
-    { group: "生成式 AI 与机器学习", id: "10010147.10010178.10010179.10010182", desc: "Computing methodologies~Natural language generation", label: "Natural language generation ‹Artificial intelligence › Natural language processing›" },
-    { group: "生成式 AI 与机器学习", id: "10010147.10010178.10010179.10010181", desc: "Computing methodologies~Discourse, dialogue and pragmatics", label: "Discourse, dialogue and pragmatics ‹Artificial intelligence › Natural language processing›" },
-    { group: "生成式 AI 与机器学习", id: "10010147.10010178.10010179.10010183", desc: "Computing methodologies~Speech recognition", label: "Speech recognition ‹Artificial intelligence › Natural language processing›" },
-    { group: "生成式 AI 与机器学习", id: "10010147.10010178.10010224", desc: "Computing methodologies~Computer vision", label: "Computer vision ‹Artificial intelligence›" },
-    { group: "生成式 AI 与机器学习", id: "10010147.10010178.10010187", desc: "Computing methodologies~Knowledge representation and reasoning", label: "Knowledge representation and reasoning ‹Artificial intelligence›" },
-    { group: "生成式 AI 与机器学习", id: "10010147.10010178.10010219.10010221", desc: "Computing methodologies~Intelligent agents", label: "Intelligent agents ‹Artificial intelligence › Distributed artificial intelligence›" },
-    { group: "生成式 AI 与机器学习", id: "10010147.10010178.10010219.10010220", desc: "Computing methodologies~Multi-agent systems", label: "Multi-agent systems ‹Artificial intelligence › Distributed artificial intelligence›" },
-    { group: "生成式 AI 与机器学习", id: "10010147.10010257", desc: "Computing methodologies~Machine learning", label: "Machine learning" },
-    { group: "生成式 AI 与机器学习", id: "10010147.10010257.10010293.10010294", desc: "Computing methodologies~Neural networks", label: "Neural networks ‹Machine learning › Machine learning approaches›" },
-    { group: "生成式 AI 与机器学习", id: "10010147.10010257.10010258.10010261", desc: "Computing methodologies~Reinforcement learning", label: "Reinforcement learning ‹Machine learning › Learning paradigms›" },
-    { group: "生成式 AI 与机器学习", id: "10010147.10010257.10010258.10010262.10010277", desc: "Computing methodologies~Transfer learning", label: "Transfer learning ‹Machine learning › Learning paradigms › Multi-task learning›" },
-    { group: "生成式 AI 与机器学习", id: "10010147.10010371.10010382.10010383", desc: "Computing methodologies~Image processing", label: "Image processing ‹Computer graphics › Image manipulation›" },
-    { group: "信息系统 / 人机交互（LLM 应用）", id: "10002951.10003317.10003338.10003341", desc: "Information systems~Language models", label: "Language models ‹Information retrieval › Retrieval models and ranking›" },
-    { group: "信息系统 / 人机交互（LLM 应用）", id: "10002951.10003317.10003347.10003350", desc: "Information systems~Recommender systems", label: "Recommender systems ‹Information retrieval › Retrieval tasks and goals›" },
-    { group: "信息系统 / 人机交互（LLM 应用）", id: "10002951.10003227.10003351", desc: "Information systems~Data mining", label: "Data mining ‹Information systems applications›" },
-    { group: "信息系统 / 人机交互（LLM 应用）", id: "10002951.10003227.10003241.10003244", desc: "Information systems~Data analytics", label: "Data analytics ‹Information systems applications › Decision support systems›" },
-    { group: "信息系统 / 人机交互（LLM 应用）", id: "10003120.10003121.10003124.10010870", desc: "Human-centered computing~Natural language interfaces", label: "Natural language interfaces ‹Human computer interaction (HCI) › Interaction paradigms›" },
-    { group: "信息系统 / 人机交互（LLM 应用）", id: "10003120.10003121", desc: "Human-centered computing~Human computer interaction (HCI)", label: "Human computer interaction (HCI)" },
-    { group: "电信与网络", id: "10003033", desc: "Networks", label: "Networks" },
-    { group: "电信与网络", id: "10003033.10003034", desc: "Networks~Network architectures", label: "Network architectures" },
-    { group: "电信与网络", id: "10003033.10003039", desc: "Networks~Network protocols", label: "Network protocols" },
-    { group: "电信与网络", id: "10003033.10003068.10003073.10003074", desc: "Networks~Network resources allocation", label: "Network resources allocation ‹Network algorithms › Control path algorithms›" },
-    { group: "电信与网络", id: "10003033.10003079", desc: "Networks~Network performance evaluation", label: "Network performance evaluation" },
-    { group: "电信与网络", id: "10003033.10003079.10011704", desc: "Networks~Network measurement", label: "Network measurement ‹Network performance evaluation›" },
-    { group: "电信与网络", id: "10003033.10003099", desc: "Networks~Network services", label: "Network services" },
-    { group: "电信与网络", id: "10003033.10003099.10003100", desc: "Networks~Cloud computing", label: "Cloud computing ‹Network services›" },
-    { group: "电信与网络", id: "10003033.10003099.10003104", desc: "Networks~Network management", label: "Network management ‹Network services›" },
-    { group: "电信与网络", id: "10003033.10003099.10003102", desc: "Networks~Programmable networks", label: "Programmable networks ‹Network services›" },
-    { group: "电信与网络", id: "10003033.10003106.10003113", desc: "Networks~Mobile networks", label: "Mobile networks ‹Network types›" },
-    { group: "电信与网络", id: "10003033.10003106.10003119", desc: "Networks~Wireless access networks", label: "Wireless access networks ‹Network types›" },
-    { group: "电信与网络", id: "10003033.10003106.10003110", desc: "Networks~Data center networks", label: "Data center networks ‹Network types›" },
-    { group: "电信与网络", id: "10003033.10003106.10003112", desc: "Networks~Cyber-physical networks", label: "Cyber-physical networks ‹Network types›" },
-    { group: "电信与网络", id: "10003033.10003083.10003014", desc: "Networks~Network security", label: "Network security ‹Network properties›" },
-    { group: "电信与网络", id: "10003033.10003083.10003014.10003017", desc: "Networks~Mobile and wireless security", label: "Mobile and wireless security ‹Network properties › Network security›" },
-    { group: "电信与网络", id: "10003033.10003083.10003095", desc: "Networks~Network reliability", label: "Network reliability ‹Network properties›" },
-    { group: "电信与网络", id: "10003033.10003058.10003065", desc: "Networks~Wireless access points, base stations and infrastructure", label: "Wireless access points, base stations and infrastructure ‹Network components›" },
-    { group: "通信硬件 / 移动计算", id: "10010405.10010432.10010988", desc: "Applied computing~Telecommunications", label: "Telecommunications ‹Physical sciences and engineering›" },
-    { group: "通信硬件 / 移动计算", id: "10010583.10010588.10011669", desc: "Hardware~Wireless devices", label: "Wireless devices ‹Communication hardware, interfaces and storage›" },
-    { group: "通信硬件 / 移动计算", id: "10010583.10010588.10003247.10003248", desc: "Hardware~Digital signal processing", label: "Digital signal processing ‹Communication hardware, interfaces and storage › Signal processing systems›" },
-    { group: "通信硬件 / 移动计算", id: "10003120.10003138.10003139.10010905", desc: "Human-centered computing~Mobile computing", label: "Mobile computing ‹Ubiquitous and mobile computing › Ubiquitous and mobile computing theory, concepts and paradigms›" },
-    { group: "通信硬件 / 移动计算", id: "10002951.10003227.10003236.10003238", desc: "Information systems~Sensor networks", label: "Sensor networks ‹Information systems applications › Spatial-temporal systems›" },
-    { group: "数字创新 / 企业与应用", id: "10002951.10003227", desc: "Information systems~Information systems applications", label: "Information systems applications" },
-    { group: "数字创新 / 企业与应用", id: "10010405.10010406.10003228", desc: "Applied computing~Enterprise information systems", label: "Enterprise information systems ‹Enterprise computing›" },
-    { group: "数字创新 / 企业与应用", id: "10002951.10003227.10003245", desc: "Information systems~Mobile information processing systems", label: "Mobile information processing systems ‹Information systems applications›" },
-    { group: "数字创新 / 企业与应用", id: "10002951.10003260.10003304", desc: "Information systems~Web services", label: "Web services ‹World Wide Web›" },
-    { group: "数字创新 / 企业与应用", id: "10010405.10003550", desc: "Applied computing~Electronic commerce", label: "Electronic commerce" },
-    { group: "数字创新 / 企业与应用", id: "10010405.10010406", desc: "Applied computing~Enterprise computing", label: "Enterprise computing" },
-    { group: "数字创新 / 企业与应用", id: "10010405.10010406.10010412", desc: "Applied computing~Business process management", label: "Business process management ‹Enterprise computing›" },
-    { group: "数字创新 / 企业与应用", id: "10010405.10010406.10010421", desc: "Applied computing~Service-oriented architectures", label: "Service-oriented architectures ‹Enterprise computing›" },
-    { group: "数字创新 / 企业与应用", id: "10010405.10010489.10010495", desc: "Applied computing~E-learning", label: "E-learning ‹Education›" },
-    { group: "数字创新 / 企业与应用", id: "10003456.10003457.10003567", desc: "Social and professional topics~Computing and business", label: "Computing and business ‹Professional topics›" },
-    { group: "数字创新 / 企业与应用", id: "10002978", desc: "Security and privacy", label: "Security and privacy" },
-    { group: "数字创新 / 企业与应用", id: "10002978.10003029.10011150", desc: "Security and privacy~Privacy protections", label: "Privacy protections ‹Human and societal aspects of security and privacy›" },
-    { group: "数字创新 / 企业与应用", id: "10002978.10002991.10002995", desc: "Security and privacy~Privacy-preserving protocols", label: "Privacy-preserving protocols ‹Security services›" },
-    { group: "数字创新 / 企业与应用", id: "10002978.10003022", desc: "Security and privacy~Software and application security", label: "Software and application security" },
+    { group: "ccs.group.ai", id: "10010147.10010178", desc: "Computing methodologies~Artificial intelligence", label: "Artificial intelligence" },
+    { group: "ccs.group.ai", id: "10010147.10010178.10010179", desc: "Computing methodologies~Natural language processing", label: "Natural language processing ‹Artificial intelligence›" },
+    { group: "ccs.group.ai", id: "10010147.10010178.10010179.10010182", desc: "Computing methodologies~Natural language generation", label: "Natural language generation ‹Artificial intelligence › Natural language processing›" },
+    { group: "ccs.group.ai", id: "10010147.10010178.10010179.10010181", desc: "Computing methodologies~Discourse, dialogue and pragmatics", label: "Discourse, dialogue and pragmatics ‹Artificial intelligence › Natural language processing›" },
+    { group: "ccs.group.ai", id: "10010147.10010178.10010179.10010183", desc: "Computing methodologies~Speech recognition", label: "Speech recognition ‹Artificial intelligence › Natural language processing›" },
+    { group: "ccs.group.ai", id: "10010147.10010178.10010224", desc: "Computing methodologies~Computer vision", label: "Computer vision ‹Artificial intelligence›" },
+    { group: "ccs.group.ai", id: "10010147.10010178.10010187", desc: "Computing methodologies~Knowledge representation and reasoning", label: "Knowledge representation and reasoning ‹Artificial intelligence›" },
+    { group: "ccs.group.ai", id: "10010147.10010178.10010219.10010221", desc: "Computing methodologies~Intelligent agents", label: "Intelligent agents ‹Artificial intelligence › Distributed artificial intelligence›" },
+    { group: "ccs.group.ai", id: "10010147.10010178.10010219.10010220", desc: "Computing methodologies~Multi-agent systems", label: "Multi-agent systems ‹Artificial intelligence › Distributed artificial intelligence›" },
+    { group: "ccs.group.ai", id: "10010147.10010257", desc: "Computing methodologies~Machine learning", label: "Machine learning" },
+    { group: "ccs.group.ai", id: "10010147.10010257.10010293.10010294", desc: "Computing methodologies~Neural networks", label: "Neural networks ‹Machine learning › Machine learning approaches›" },
+    { group: "ccs.group.ai", id: "10010147.10010257.10010258.10010261", desc: "Computing methodologies~Reinforcement learning", label: "Reinforcement learning ‹Machine learning › Learning paradigms›" },
+    { group: "ccs.group.ai", id: "10010147.10010257.10010258.10010262.10010277", desc: "Computing methodologies~Transfer learning", label: "Transfer learning ‹Machine learning › Learning paradigms › Multi-task learning›" },
+    { group: "ccs.group.ai", id: "10010147.10010371.10010382.10010383", desc: "Computing methodologies~Image processing", label: "Image processing ‹Computer graphics › Image manipulation›" },
+    { group: "ccs.group.is", id: "10002951.10003317.10003338.10003341", desc: "Information systems~Language models", label: "Language models ‹Information retrieval › Retrieval models and ranking›" },
+    { group: "ccs.group.is", id: "10002951.10003317.10003347.10003350", desc: "Information systems~Recommender systems", label: "Recommender systems ‹Information retrieval › Retrieval tasks and goals›" },
+    { group: "ccs.group.is", id: "10002951.10003227.10003351", desc: "Information systems~Data mining", label: "Data mining ‹Information systems applications›" },
+    { group: "ccs.group.is", id: "10002951.10003227.10003241.10003244", desc: "Information systems~Data analytics", label: "Data analytics ‹Information systems applications › Decision support systems›" },
+    { group: "ccs.group.is", id: "10003120.10003121.10003124.10010870", desc: "Human-centered computing~Natural language interfaces", label: "Natural language interfaces ‹Human computer interaction (HCI) › Interaction paradigms›" },
+    { group: "ccs.group.is", id: "10003120.10003121", desc: "Human-centered computing~Human computer interaction (HCI)", label: "Human computer interaction (HCI)" },
+    { group: "ccs.group.net", id: "10003033", desc: "Networks", label: "Networks" },
+    { group: "ccs.group.net", id: "10003033.10003034", desc: "Networks~Network architectures", label: "Network architectures" },
+    { group: "ccs.group.net", id: "10003033.10003039", desc: "Networks~Network protocols", label: "Network protocols" },
+    { group: "ccs.group.net", id: "10003033.10003068.10003073.10003074", desc: "Networks~Network resources allocation", label: "Network resources allocation ‹Network algorithms › Control path algorithms›" },
+    { group: "ccs.group.net", id: "10003033.10003079", desc: "Networks~Network performance evaluation", label: "Network performance evaluation" },
+    { group: "ccs.group.net", id: "10003033.10003079.10011704", desc: "Networks~Network measurement", label: "Network measurement ‹Network performance evaluation›" },
+    { group: "ccs.group.net", id: "10003033.10003099", desc: "Networks~Network services", label: "Network services" },
+    { group: "ccs.group.net", id: "10003033.10003099.10003100", desc: "Networks~Cloud computing", label: "Cloud computing ‹Network services›" },
+    { group: "ccs.group.net", id: "10003033.10003099.10003104", desc: "Networks~Network management", label: "Network management ‹Network services›" },
+    { group: "ccs.group.net", id: "10003033.10003099.10003102", desc: "Networks~Programmable networks", label: "Programmable networks ‹Network services›" },
+    { group: "ccs.group.net", id: "10003033.10003106.10003113", desc: "Networks~Mobile networks", label: "Mobile networks ‹Network types›" },
+    { group: "ccs.group.net", id: "10003033.10003106.10003119", desc: "Networks~Wireless access networks", label: "Wireless access networks ‹Network types›" },
+    { group: "ccs.group.net", id: "10003033.10003106.10003110", desc: "Networks~Data center networks", label: "Data center networks ‹Network types›" },
+    { group: "ccs.group.net", id: "10003033.10003106.10003112", desc: "Networks~Cyber-physical networks", label: "Cyber-physical networks ‹Network types›" },
+    { group: "ccs.group.net", id: "10003033.10003083.10003014", desc: "Networks~Network security", label: "Network security ‹Network properties›" },
+    { group: "ccs.group.net", id: "10003033.10003083.10003014.10003017", desc: "Networks~Mobile and wireless security", label: "Mobile and wireless security ‹Network properties › Network security›" },
+    { group: "ccs.group.net", id: "10003033.10003083.10003095", desc: "Networks~Network reliability", label: "Network reliability ‹Network properties›" },
+    { group: "ccs.group.net", id: "10003033.10003058.10003065", desc: "Networks~Wireless access points, base stations and infrastructure", label: "Wireless access points, base stations and infrastructure ‹Network components›" },
+    { group: "ccs.group.hw", id: "10010405.10010432.10010988", desc: "Applied computing~Telecommunications", label: "Telecommunications ‹Physical sciences and engineering›" },
+    { group: "ccs.group.hw", id: "10010583.10010588.10011669", desc: "Hardware~Wireless devices", label: "Wireless devices ‹Communication hardware, interfaces and storage›" },
+    { group: "ccs.group.hw", id: "10010583.10010588.10003247.10003248", desc: "Hardware~Digital signal processing", label: "Digital signal processing ‹Communication hardware, interfaces and storage › Signal processing systems›" },
+    { group: "ccs.group.hw", id: "10003120.10003138.10003139.10010905", desc: "Human-centered computing~Mobile computing", label: "Mobile computing ‹Ubiquitous and mobile computing › Ubiquitous and mobile computing theory, concepts and paradigms›" },
+    { group: "ccs.group.hw", id: "10002951.10003227.10003236.10003238", desc: "Information systems~Sensor networks", label: "Sensor networks ‹Information systems applications › Spatial-temporal systems›" },
+    { group: "ccs.group.biz", id: "10002951.10003227", desc: "Information systems~Information systems applications", label: "Information systems applications" },
+    { group: "ccs.group.biz", id: "10010405.10010406.10003228", desc: "Applied computing~Enterprise information systems", label: "Enterprise information systems ‹Enterprise computing›" },
+    { group: "ccs.group.biz", id: "10002951.10003227.10003245", desc: "Information systems~Mobile information processing systems", label: "Mobile information processing systems ‹Information systems applications›" },
+    { group: "ccs.group.biz", id: "10002951.10003260.10003304", desc: "Information systems~Web services", label: "Web services ‹World Wide Web›" },
+    { group: "ccs.group.biz", id: "10010405.10003550", desc: "Applied computing~Electronic commerce", label: "Electronic commerce" },
+    { group: "ccs.group.biz", id: "10010405.10010406", desc: "Applied computing~Enterprise computing", label: "Enterprise computing" },
+    { group: "ccs.group.biz", id: "10010405.10010406.10010412", desc: "Applied computing~Business process management", label: "Business process management ‹Enterprise computing›" },
+    { group: "ccs.group.biz", id: "10010405.10010406.10010421", desc: "Applied computing~Service-oriented architectures", label: "Service-oriented architectures ‹Enterprise computing›" },
+    { group: "ccs.group.biz", id: "10010405.10010489.10010495", desc: "Applied computing~E-learning", label: "E-learning ‹Education›" },
+    { group: "ccs.group.biz", id: "10003456.10003457.10003567", desc: "Social and professional topics~Computing and business", label: "Computing and business ‹Professional topics›" },
+    { group: "ccs.group.biz", id: "10002978", desc: "Security and privacy", label: "Security and privacy" },
+    { group: "ccs.group.biz", id: "10002978.10003029.10011150", desc: "Security and privacy~Privacy protections", label: "Privacy protections ‹Human and societal aspects of security and privacy›" },
+    { group: "ccs.group.biz", id: "10002978.10002991.10002995", desc: "Security and privacy~Privacy-preserving protocols", label: "Privacy-preserving protocols ‹Security services›" },
+    { group: "ccs.group.biz", id: "10002978.10003022", desc: "Security and privacy~Software and application security", label: "Software and application security" },
   ];
 
   // Pre-filled conference; anything the user edits (including clearing a field) is saved on top of these.
@@ -93,7 +93,10 @@
   const URL_RE = /((?:https?:\/\/|www\.)[^\s<>"'（）()]+)/g;
 
   const $ = (id) => document.getElementById(id);
-  const state = { step: "import", file: null, templateFile: { name: "内置 acmart 模板" }, templateText: "", templateZip: null, templateEntries: [], templateMainPath: "main.tex", templateType: "acm", layoutMode: "single", fixedAssetsPromise: null, conference: {}, sourceHtml: "", bodyHtml: "", renderedBodyHtml: "", bodyStatsCache: null, zoom: 82, metadata: {}, authors: [], equations: [], charts: 0, oleObjects: 0, equationsDropped: 0, mathErrors: 0, citeStats: null, floatMode: "auto" };
+  const I18N = WordTeXI18N, t = I18N.t;
+  I18N.setLanguage(I18N.detect());
+  I18N.apply(document);
+  const state = { step: "import", file: null, templateFile: { name: "built-in acmart template" }, templateText: "", templateZip: null, templateEntries: [], templateMainPath: "main.tex", templateType: "acm", layoutMode: "single", fixedAssetsPromise: null, conference: {}, sourceHtml: "", bodyHtml: "", renderedBodyHtml: "", bodyStatsCache: null, zoom: 82, metadata: {}, authors: [], equations: [], charts: 0, oleObjects: 0, equationsDropped: 0, mathErrors: 0, citeStats: null, floatMode: "auto" };
   const els = {
     fileInput: $("fileInput"), dropZone: $("dropZone"), fileCard: $("fileCard"), fileName: $("fileName"), fileMeta: $("fileMeta"),
     emptyNotice: $("emptyNotice"), next: $("nextBtn"), back: $("backBtn"), paper: $("paper"), body: $("paperBody"),
@@ -102,9 +105,9 @@
   };
 
   const labels = {
-    import: { panel: "importPanel", next: "识别并校对" },
-    review: { panel: "reviewPanel", next: "确认并导出" },
-    export: { panel: "exportPanel", next: "重新校对" }
+    import: { panel: "importPanel", next: "next.import" },
+    review: { panel: "reviewPanel", next: "next.review" },
+    export: { panel: "exportPanel", next: "next.export" }
   };
 
   document.querySelectorAll(".step").forEach((button) => button.addEventListener("click", () => {
@@ -121,8 +124,8 @@
     fillConferenceForm(state.conference);
     saveConferenceSettings(false);
     applyFixedTemplate(); updatePreview();
-    $("conferenceSaveState").textContent = "已恢复为默认会议 GAITDI 2026";
-    showToast("会议资料已恢复默认");
+    setSaveState("venue.state.restored", { short: CONFERENCE_DEFAULTS.shortName });
+    showToast(t("venue.toast.restored"));
   });
   $("importConferenceInput").addEventListener("change", importConferenceSettings);
   ["conferenceName", "conferenceShort", "conferenceYear", "conferenceDates", "conferenceLocation", "conferenceIsbn", "conferenceFormat", "conferenceCopyright", "conferenceFolios"].forEach((id) => ["input", "change"].forEach((type) => $(id).addEventListener(type, () => {
@@ -150,6 +153,8 @@
   $("contentEditor").addEventListener("input", scheduleContentEdit);
   $("contentEditor").addEventListener("change", (event) => { if (event.target.classList.contains("block-type")) retagBlock(event.target); });
   if ($("floatMode")) $("floatMode").addEventListener("change", (event) => { state.floatMode = event.target.value; });
+  document.querySelectorAll(".lang-switch button").forEach((button) => button.addEventListener("click", () => switchLanguage(button.dataset.lang)));
+  markLanguageSwitch();
   initCcsPicker();
   loadConferenceSettings();
   applyFixedTemplate();
@@ -167,9 +172,9 @@
       button.classList.toggle("done", order.indexOf(button.dataset.step) < order.indexOf(step));
     });
     els.back.classList.toggle("hidden", step === "import");
-    els.next.textContent = labels[step].next;
+    els.next.textContent = t(state.file ? labels[step].next : "next.initial");
     els.next.disabled = !state.file;
-    if (step === "export") showToast("排版结果已就绪");
+    if (step === "export") showToast(t("toast.exportReady"));
   }
 
   function bindDropZone(zone, input, handler) {
@@ -231,6 +236,30 @@ ${rights.join("\n")}
 `;
   }
 
+  // The status line under the venue form is re-rendered on a language switch, so its key and parameters are kept.
+  function setSaveState(key, vars) { state.saveState = { key, vars }; $("conferenceSaveState").textContent = t(key, vars); }
+
+  function markLanguageSwitch() {
+    document.querySelectorAll(".lang-switch button").forEach((button) => button.classList.toggle("active", button.dataset.lang === I18N.language()));
+  }
+  // Switch the interface language and redraw everything that was rendered from strings.
+  function switchLanguage(lang) {
+    if (lang === I18N.language()) return;
+    flushContentEdit();
+    I18N.setLanguage(lang);
+    I18N.apply(document);
+    markLanguageSwitch();
+    if (state.saveState) $("conferenceSaveState").textContent = t(state.saveState.key, state.saveState.vars);
+    if (state.file && state.fileMetaKey) els.fileMeta.textContent = t(state.fileMetaKey, { size: formatBytes(state.file.size), words: (state.metadata.wordCount || 0).toLocaleString() });
+    if (state.recognitionKey) $("recognitionBadge").textContent = t(state.recognitionKey);
+    fillCcsSelect(); renderCcsChips();
+    renderAuthorEditor();
+    if (state.bodyHtml) renderContentEditor();
+    applyFixedTemplate();
+    els.next.textContent = t(state.file ? labels[state.step].next : "next.initial");
+    if (state.file) updateChecks();
+  }
+
   function readConferenceForm() {
     return { name: $("conferenceName").value.trim(), shortName: $("conferenceShort").value.trim(), year: $("conferenceYear").value.trim(), dates: $("conferenceDates").value.trim(), location: $("conferenceLocation").value.trim(), isbn: $("conferenceIsbn").value.trim(), format: $("conferenceFormat").value, copyright: $("conferenceCopyright").value, folios: $("conferenceFolios").checked };
   }
@@ -245,12 +274,12 @@ ${rights.join("\n")}
       const stored = JSON.parse(localStorage.getItem(conferenceStorageKey) || "null");
       state.conference = Object.assign({}, CONFERENCE_DEFAULTS, stored || {});
       fillConferenceForm(state.conference);
-      $("conferenceSaveState").textContent = stored ? "已自动载入本机保存的会议资料，修改后自动保存" : "已填入默认会议 GAITDI 2026，修改后自动保存在本机浏览器";
+      setSaveState(stored ? "venue.state.loaded" : "venue.state.defaults");
     } catch (_) {
       conferenceStorageAvailable = false;
       state.conference = Object.assign({}, CONFERENCE_DEFAULTS);
       fillConferenceForm(state.conference);
-      $("conferenceSaveState").textContent = "已填入默认会议；当前打开方式禁止浏览器存储，修改后请下载会议配置备份";
+      setSaveState("venue.state.noStorageDefaults");
     }
   }
 
@@ -265,21 +294,21 @@ ${rights.join("\n")}
   function saveConferenceSettings(notifyUser) {
     state.conference = readConferenceForm();
     if (!conferenceStorageAvailable) {
-      $("conferenceSaveState").textContent = "当前打开方式禁止浏览器存储，请点击“下载会议配置”";
-      if (notifyUser) showToast("当前页面无法写入浏览器，请改用会议配置文件");
+      setSaveState("venue.state.noStorage");
+      if (notifyUser) showToast(t("venue.toast.noStorage"));
       return false;
     }
     try {
       localStorage.setItem(conferenceStorageKey, JSON.stringify(state.conference));
       conferenceLastSaved = new Date();
       const savedAt = conferenceLastSaved.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-      $("conferenceSaveState").textContent = "已自动保存到本机 · " + savedAt;
-      if (notifyUser) showToast("会议资料已保存，后续论文将自动沿用");
+      setSaveState("venue.state.saved", { time: savedAt });
+      if (notifyUser) showToast(t("venue.toast.saved"));
       return true;
     } catch (_) {
       conferenceStorageAvailable = false;
-      $("conferenceSaveState").textContent = "当前打开方式禁止浏览器存储，请点击“下载会议配置”";
-      if (notifyUser) showToast("当前页面无法写入浏览器，请改用会议配置文件");
+      setSaveState("venue.state.noStorage");
+      if (notifyUser) showToast(t("venue.toast.noStorage"));
       return false;
     }
   }
@@ -287,10 +316,10 @@ ${rights.join("\n")}
   function exportConferenceSettings() {
     state.conference = readConferenceForm();
     const payload = { format: "ei-typesetter-conference", version: 1, conference: state.conference };
-    const name = safeBaseName(state.conference.shortName || state.conference.name || "conference") + "-会议配置.json";
+    const name = safeBaseName(state.conference.shortName || state.conference.name || "conference") + t("venue.fileSuffix");
     downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" }), name);
-    $("conferenceSaveState").textContent = "会议配置文件已下载，可在以后重新导入";
-    showToast("会议配置已下载到本机");
+    setSaveState("venue.state.downloaded");
+    showToast(t("venue.toast.downloaded"));
   }
 
   async function importConferenceSettings(event) {
@@ -303,10 +332,10 @@ ${rights.join("\n")}
       state.conference = { name: String(info.name || ""), shortName: String(info.shortName || ""), year: String(info.year || ""), dates: String(info.dates || ""), location: String(info.location || ""), isbn: String(info.isbn || ""), format: info.format === "manuscript" ? "manuscript" : "acmsmall", copyright: COPYRIGHT_OPTIONS.includes(info.copyright) ? info.copyright : "acmlicensed", folios: !!info.folios };
       fillConferenceForm(state.conference);
       const stored = saveConferenceSettings(false);
-      $("conferenceSaveState").textContent = stored ? "配置已导入并自动保存到本机" : "配置已导入；当前打开方式无法自动保存";
+      setSaveState(stored ? "venue.state.imported" : "venue.state.importedNoStorage");
       applyFixedTemplate(); updatePreview();
-      showToast("会议配置导入成功");
-    } catch (_) { showToast("会议配置文件格式不正确"); }
+      showToast(t("venue.toast.imported"));
+    } catch (_) { showToast(t("venue.toast.invalid")); }
     event.target.value = "";
   }
 
@@ -315,13 +344,13 @@ ${rights.join("\n")}
     state.templateText = fixedTemplate();
     els.paper.classList.add("single-column");
     const manuscript = conferenceFormat() === "manuscript";
-    const label = manuscript ? "ACM Manuscript 单栏（投稿审稿版）" : "ACM acmsmall 单栏（定稿版）";
-    const tag = manuscript ? "MANUSCRIPT 单栏" : "ACMSMALL 单栏";
+    const label = t(manuscript ? "template.manuscript.label" : "template.acmsmall.label");
+    const tag = t(manuscript ? "template.manuscript.tag" : "template.acmsmall.tag");
     $("templateClassName").textContent = label;
-    $("templateMainName").textContent = "内置 acmart v2.20 · main.tex";
+    $("templateMainName").textContent = t("template.mainName");
     $("detectedTemplate").textContent = tag;
     $("exportFormatTag").textContent = tag;
-    $("previewStatus").textContent = state.file ? "已按 " + label + " 生成分页预览" : label + "模板已就绪";
+    $("previewStatus").textContent = t(state.file ? "preview.generated" : "preview.ready", { label });
     applyTemplatePreview("acm", state.templateText);
   }
 
@@ -336,7 +365,7 @@ ${rights.join("\n")}
   }
 
 
-  function templateLabel(type) { return ({ acm: "ACM Manuscript 单栏", ieee: "IEEE", llncs: "Springer LNCS", twocolumn: "通用模板", article: "通用单栏" })[type] || "LaTeX 模板"; }
+  function templateLabel(type) { return ({ acm: t("template.manuscript.label"), ieee: "IEEE", llncs: "Springer LNCS" })[type] || t("template.generic"); }
 
   function applyTemplatePreview(type, text) {
     els.paper.classList.remove("template-acm", "template-ieee", "template-llncs", "template-article", "template-twocolumn");
@@ -347,16 +376,16 @@ ${rights.join("\n")}
 
   async function handleFile(file) {
     if (!file) return;
-    if (!/\.docx$/i.test(file.name)) return showToast("请选择 .docx 格式的 Word 文档");
-    if (file.size > 30 * 1024 * 1024) return showToast("文件超过 30 MB，请压缩图片后再试");
+    if (!/\.docx$/i.test(file.name)) return showToast(t("toast.notDocx"));
+    if (file.size > 30 * 1024 * 1024) return showToast(t("toast.tooLarge"));
     state.file = file;
     els.dropZone.classList.add("hidden");
     els.emptyNotice.classList.add("hidden");
     els.fileCard.classList.remove("hidden");
     els.fileName.textContent = file.name;
-    els.fileMeta.textContent = formatBytes(file.size) + " · 正在识别结构…";
+    state.fileMetaKey = "file.recognising"; els.fileMeta.textContent = t("file.recognising", { size: formatBytes(file.size) });
     els.next.disabled = true;
-    $("previewStatus").textContent = "正在解析 Word 文档";
+    $("previewStatus").textContent = t("preview.parsing");
     try {
       const arrayBuffer = await file.arrayBuffer();
       // Rewrite document.xml before mammoth sees it: Word equations become LaTeX placeholders, native charts
@@ -383,14 +412,14 @@ ${rights.join("\n")}
       populateFields(parsed);
       updatePreview();
       updateReport(parsed, result.messages);
-      els.fileMeta.textContent = formatBytes(file.size) + " · " + parsed.wordCount.toLocaleString() + " words";
+      state.fileMetaKey = "file.words"; els.fileMeta.textContent = t("file.words", { size: formatBytes(file.size), words: parsed.wordCount.toLocaleString() });
       els.next.disabled = false;
-      els.next.textContent = "识别并校对";
-      $("previewStatus").textContent = "已按 ACM Manuscript 单栏生成分页预览";
-      showToast("Word 文档识别完成");
+      els.next.textContent = t("next.import");
+      applyFixedTemplate();
+      showToast(t("toast.recognised"));
     } catch (error) {
       console.error(error);
-      showToast("未能读取该文档，请确认文件未损坏或加密");
+      showToast(t("toast.unreadable"));
       resetWord();
     }
   }
@@ -476,7 +505,7 @@ ${rights.join("\n")}
       const e = byId[id]; if (!e) return "";
       return '<span class="math" data-eq="' + id + '" data-display="' + (e.display ? "1" : "0") + '"' + (e.tag ? ' data-tag="' + escapeHtml(e.tag) + '"' : "") + ">" + escapeHtml(e.latex) + "</span>";
     });
-    html = html.replace(CHART_PLACEHOLDER_RE, (m, n) => '<span class="placeholder-chart" data-kind="chart">[Word 原生图表 ' + n + '：无法导出为图片，已保留位置。请在 Word 中将图表另存为 PNG 后替换，或删除此占位]</span>');
+    html = html.replace(CHART_PLACEHOLDER_RE, (m, n) => '<span class="placeholder-chart" data-kind="chart">' + escapeHtml(t("block.chartPlaceholder", { n })) + '</span>');
     return html;
   }
 
@@ -1013,16 +1042,16 @@ ${rights.join("\n")}
     wrapper.innerHTML = state.bodyHtml;
     const blocks = [...wrapper.children];
     if (!blocks.length) {
-      host.innerHTML = '<div class="content-empty">没有识别到正文内容</div>';
+      host.innerHTML = '<div class="content-empty">' + t("review.bodyNone") + '</div>';
       return;
     }
     host.innerHTML = blocks.map((node, index) => {
       const tag = node.tagName.toLowerCase();
       const onlyMath = tag === "p" && node.querySelector("span.math") && !node.textContent.replace(/\s+/g, "").replace(node.querySelector("span.math").textContent.replace(/\s+/g, ""), "").replace(/[()（）\d]/g, "");
-      const label = /^h[1-6]$/.test(tag) ? (node.dataset.src === "bold" ? "章节标题（由加粗推断，请确认）" : "章节标题") : tag === "table" ? "表格" : onlyMath ? "公式（LaTeX，可直接修改）" : node.querySelector("span.math") ? "含公式的段落" : node.querySelector("span.placeholder-chart") ? "图表占位" : node.querySelector("img.img-figure") ? "图片" : node.querySelector("img.img-inline, img.img-display") ? "含公式图片的段落" : tag === "figure" || node.querySelector("img") ? "图片或图题" : tag === "ul" || tag === "ol" ? "列表" : node.classList.contains("reference-entry") ? "参考文献" : tag === "figcaption" ? "图题/表题" : "正文段落";
+      const label = t(/^h[1-6]$/.test(tag) ? (node.dataset.src === "bold" ? "block.headingInferred" : "block.heading") : tag === "table" ? "block.table" : onlyMath ? "block.equation" : node.querySelector("span.math") ? "block.mathParagraph" : node.querySelector("span.placeholder-chart") ? "block.chart" : node.querySelector("img.img-figure") ? "block.figure" : node.querySelector("img.img-inline, img.img-display") ? "block.formulaImages" : tag === "figure" || node.querySelector("img") ? "block.figureOrCaption" : tag === "ul" || tag === "ol" ? "block.list" : node.classList.contains("reference-entry") ? "block.reference" : tag === "figcaption" ? "block.caption" : "block.paragraph");
       const current = /^h[1-3]$/.test(tag) ? tag : tag === "figcaption" ? "figcaption" : node.classList.contains("reference-entry") ? "ref" : tag === "p" ? "p" : "";
-      const options = current ? '<select class="block-type" title="修改这个块的类型">' + [["h1", "一级标题"], ["h2", "二级标题"], ["h3", "三级标题"], ["p", "正文段落"], ["figcaption", "图题/表题"], ["ref", "参考文献条目"]].map(([v, t]) => '<option value="' + v + '"' + (v === current ? " selected" : "") + ">" + t + "</option>").join("") + "</select>" : "";
-      return '<section class="content-block" data-index="' + index + '"><header class="content-block-head"><b>' + label + '</b>' + options + '<span>内容 ' + (index + 1) + '</span></header><div class="content-block-value" contenteditable="true" spellcheck="true">' + node.outerHTML + '</div></section>';
+      const options = current ? '<select class="block-type" title="' + escapeHtml(t("block.typeTitle")) + '">' + ["h1", "h2", "h3", "p", "figcaption", "ref"].map((v) => '<option value="' + v + '"' + (v === current ? " selected" : "") + ">" + escapeHtml(t("block.type." + v)) + "</option>").join("") + "</select>" : "";
+      return '<section class="content-block" data-index="' + index + '"><header class="content-block-head"><b>' + label + '</b>' + options + '<span>' + escapeHtml(t("block.index", { n: index + 1 })) + '</span></header><div class="content-block-value" contenteditable="true" spellcheck="true">' + node.outerHTML + '</div></section>';
     }).join("");
   }
 
@@ -1077,7 +1106,7 @@ ${rights.join("\n")}
     if (!state.authors.length) state.authors = [blankAuthor()];
     $("authorEditor").innerHTML = state.authors.map((author, i) => {
       const orcidError = author.orcid && !validOrcid(author.orcid);
-      return "<section class=\"author-card " + (orcidError ? "orcid-error" : "") + "\" data-index=\"" + i + "\"><header class=\"author-card-header\"><b>作者 " + (i + 1) + "</b><label><input type=\"checkbox\" data-field=\"corresponding\" " + (author.corresponding ? "checked" : "") + ">通讯作者</label><button type=\"button\" data-action=\"up\" title=\"上移\">↑</button><button type=\"button\" data-action=\"down\" title=\"下移\">↓</button><button type=\"button\" data-action=\"remove\" title=\"删除\">×</button></header><div class=\"author-fields\"><label>姓名<input data-field=\"name\" value=\"" + escapeHtml(author.name) + "\" placeholder=\"Full name\"></label><label>电子邮箱<input data-field=\"email\" value=\"" + escapeHtml(author.email) + "\" placeholder=\"name@example.com\"></label><label class=\"wide\">ORCID<input data-field=\"orcid\" value=\"" + escapeHtml(author.orcid) + "\" placeholder=\"0000-0000-0000-000X\"></label><span class=\"orcid-hint\">ORCID 格式或校验位不正确</span><label class=\"wide\">机构/院系<input data-field=\"institution\" value=\"" + escapeHtml(author.institution) + "\" placeholder=\"Institution / Department\"></label><label>城市<input data-field=\"city\" value=\"" + escapeHtml(author.city) + "\" placeholder=\"City\"></label><label>国家/地区<input data-field=\"country\" value=\"" + escapeHtml(author.country) + "\" placeholder=\"Country\"></label></div></section>";
+      return "<section class=\"author-card " + (orcidError ? "orcid-error" : "") + "\" data-index=\"" + i + "\"><header class=\"author-card-header\"><b>" + escapeHtml(t("author.card", { n: i + 1 })) + "</b><label><input type=\"checkbox\" data-field=\"corresponding\" " + (author.corresponding ? "checked" : "") + ">" + escapeHtml(t("author.corresponding")) + "</label><button type=\"button\" data-action=\"up\" title=\"" + escapeHtml(t("author.up")) + "\">↑</button><button type=\"button\" data-action=\"down\" title=\"" + escapeHtml(t("author.down")) + "\">↓</button><button type=\"button\" data-action=\"remove\" title=\"" + escapeHtml(t("author.remove")) + "\">×</button></header><div class=\"author-fields\"><label>" + escapeHtml(t("author.name")) + "<input data-field=\"name\" value=\"" + escapeHtml(author.name) + "\" placeholder=\"Full name\"></label><label>" + escapeHtml(t("author.email")) + "<input data-field=\"email\" value=\"" + escapeHtml(author.email) + "\" placeholder=\"name@example.com\"></label><label class=\"wide\">ORCID<input data-field=\"orcid\" value=\"" + escapeHtml(author.orcid) + "\" placeholder=\"0000-0000-0000-000X\"></label><span class=\"orcid-hint\">" + escapeHtml(t("author.orcidHint")) + "</span><label class=\"wide\">" + escapeHtml(t("author.institution")) + "<input data-field=\"institution\" value=\"" + escapeHtml(author.institution) + "\" placeholder=\"Institution / Department\"></label><label>" + escapeHtml(t("author.city")) + "<input data-field=\"city\" value=\"" + escapeHtml(author.city) + "\" placeholder=\"City\"></label><label>" + escapeHtml(t("author.country")) + "<input data-field=\"country\" value=\"" + escapeHtml(author.country) + "\" placeholder=\"Country\"></label></div></section>";
     }).join("");
     syncLegacyAuthorFields();
   }
@@ -1187,53 +1216,62 @@ ${rights.join("\n")}
     $("figureCount").textContent = data.figures;
     $("tableCount").textContent = data.tables;
     $("referenceCount").textContent = data.references;
-    $("recognitionBadge").textContent = messages && messages.length ? "需复核" : "已识别";
+    state.recognitionKey = messages && messages.length ? "review.needsReview" : "review.recognised"; $("recognitionBadge").textContent = t(state.recognitionKey);
     updateChecks();
   }
 
   function updateChecks() {
     const meta = currentMeta();
     const stats = bodyStats();
+    const unsupported = stats.unsupportedImages, unlinked = state.citeStats ? state.citeStats.unlinked : 0, noCountry = state.authors.filter((a) => a.name && !a.country).length;
+    // [passed, message when passed, message when failing]; messages are i18n keys resolved with t()
     const checks = [
-      [!!state.templateFile && /\\begin\s*\{document\}/.test(state.templateText), "LaTeX 模板结构有效", "模板结构需要复核"],
-      [!!meta.title, "标题已识别", "缺少论文标题"],
-      [!!meta.authors, "作者信息已识别", "请补充作者信息"],
-      [state.authors.some((a) => a.corresponding), "通讯作者已设置", "请勾选通讯作者"],
-      [state.authors.every((a) => !a.orcid || validOrcid(a.orcid)), "ORCID 格式有效", "存在无效 ORCID"],
-      [meta.abstract.length >= 50, "摘要结构完整", "摘要过短或未识别"],
-      [!!meta.keywords, "关键词已识别", "请补充关键词"],
-      [!!state.conference.name && !!state.conference.year && !!state.conference.isbn, "会议资料已填写", "请填写并保存会议名称、年份和 ISBN"],
-      [!!meta.doi, "本文 DOI 已填写", "请填写本文 DOI"],
-      [state.metadata.sections > 0, "正文层级已建立", "未检测到章节标题"],
-      [state.metadata.references > 0, "参考文献已识别", "未检测到参考文献列表"],
-      [!state.equationsDropped && !(state.mathErrors > 0), (state.equations || []).length ? "已转换 " + state.equations.length + " 处 Word 公式为 LaTeX" : "未发现 Word 公式", state.equationsDropped ? state.equationsDropped + " 处 Word 公式转换失败，请在 Word 中改为图片或手写 LaTeX" : state.mathErrors + " 处公式 LaTeX 有语法错误（预览中标红），请在校对框修改"],
-      [!state.oleObjects, "未发现旧式公式编辑器对象", state.oleObjects + " 处 MathType/公式编辑器 3.0 对象：Word 只保存了 WMF 预览图，已用占位框代替，请重新输入公式或提供 PNG"],
-      [!state.charts, "未发现 Word 原生图表", state.charts + " 处 Word 原生图表无法导出图片，已在原位置放置占位框，请另存为 PNG 后替换"],
-      [stats.unsupportedImages === 0, "图片格式可用于 LaTeX", stats.unsupportedImages + " 张 EMF/WMF/GIF/BMP 图片已用占位框代替（项目仍可编译），请在 Word 中改为 PNG"],
-      [!stats.tableImages, "表格内无图片", stats.tableImages + " 张图片位于表格单元格内，已按单元格宽度嵌入 LaTeX 表格，导出后请检查尺寸"],
-      [!(state.metadata.inferredHeadings > 0), "章节标题来自 Word 样式", state.metadata.inferredHeadings + " 个标题由加粗文字推断，请在校对框确认层级"],
-      [!(state.citeStats && state.citeStats.unlinked > 0), state.citeStats && state.citeStats.linked ? "文内引用已关联参考文献（" + state.citeStats.linked + " 处）" : "文内引用关联：导出时处理", (state.citeStats ? state.citeStats.unlinked : 0) + " 处文内引用未能与参考文献匹配，导出后请检查"],
-      [state.authors.every((a) => !a.name || a.country), "作者国家已填写", state.authors.filter((a) => a.name && !a.country).length + " 位作者缺少国家/地区（ACM 模板必填）"],
-      [(meta.keywords || "").length < 400 && (meta.abstract || "").length < 6000, "摘要/关键词长度正常", "摘要或关键词字段过长，可能吞入了正文，请检查"],
-      [!!meta.ccs, "CCS 概念已选择", "未选择 CCS 概念（ACM 出版需要，非 ACM 会议可忽略）" + (state.metadata.ccsText ? "；原稿写有：" + state.metadata.ccsText.slice(0, 80) : "")],
-      [true, cjkCount(meta.title + meta.abstract + meta.keywords) + stats.cjk === 0 ? "无中文字符" : "含中文字符：已自动加载 xeCJK（需要系统有中文字体）", ""]
+      [!!state.templateFile && /\\begin\s*\{document\}/.test(state.templateText), t("checks.template.ok"), t("checks.template.warn")],
+      [!!meta.title, t("checks.title.ok"), t("checks.title.warn")],
+      [!!meta.authors, t("checks.authors.ok"), t("checks.authors.warn")],
+      [state.authors.some((a) => a.corresponding), t("checks.corresponding.ok"), t("checks.corresponding.warn")],
+      [state.authors.every((a) => !a.orcid || validOrcid(a.orcid)), t("checks.orcid.ok"), t("checks.orcid.warn")],
+      [meta.abstract.length >= 50, t("checks.abstract.ok"), t("checks.abstract.warn")],
+      [!!meta.keywords, t("checks.keywords.ok"), t("checks.keywords.warn")],
+      [!!state.conference.name && !!state.conference.year && !!state.conference.isbn, t("checks.venue.ok"), t("checks.venue.warn")],
+      [!!meta.doi, t("checks.doi.ok"), t("checks.doi.warn")],
+      [state.metadata.sections > 0, t("checks.sections.ok"), t("checks.sections.warn")],
+      [state.metadata.references > 0, t("checks.references.ok"), t("checks.references.warn")],
+      [!state.equationsDropped && !(state.mathErrors > 0), (state.equations || []).length ? t("checks.equations.ok", { n: state.equations.length }) : t("checks.equations.none"), state.equationsDropped ? t("checks.equations.dropped", { n: state.equationsDropped }) : t("checks.equations.errors", { n: state.mathErrors })],
+      [!state.oleObjects, t("checks.ole.ok"), t("checks.ole.warn", { n: state.oleObjects })],
+      [!state.charts, t("checks.charts.ok"), t("checks.charts.warn", { n: state.charts })],
+      [unsupported === 0, t("checks.images.ok"), t("checks.images.warn", { n: unsupported })],
+      [!stats.tableImages, t("checks.tableImages.ok"), t("checks.tableImages.warn", { n: stats.tableImages })],
+      [!(state.metadata.inferredHeadings > 0), t("checks.inferred.ok"), t("checks.inferred.warn", { n: state.metadata.inferredHeadings })],
+      [!(unlinked > 0), state.citeStats && state.citeStats.linked ? t("checks.cites.linked", { n: state.citeStats.linked }) : t("checks.cites.pending"), t("checks.cites.warn", { n: unlinked })],
+      [state.authors.every((a) => !a.name || a.country), t("checks.country.ok"), t("checks.country.warn", { n: noCountry })],
+      [(meta.keywords || "").length < 400 && (meta.abstract || "").length < 6000, t("checks.length.ok"), t("checks.length.warn")],
+      [!!meta.ccs, t("checks.ccs.ok"), t("checks.ccs.warn") + (state.metadata.ccsText ? t("checks.ccs.manuscript", { text: state.metadata.ccsText.slice(0, 80) }) : "")],
+      [true, cjkCount(meta.title + meta.abstract + meta.keywords) + stats.cjk === 0 ? t("checks.cjk.none") : t("checks.cjk.present"), ""]
     ];
     const passed = checks.filter((item) => item[0]).length;
-    $("qualityScore").textContent = Math.round((passed / checks.length) * 100) + "% 完整";
+    $("qualityScore").textContent = t("review.score", { pct: Math.round((passed / checks.length) * 100) });
     $("checkList").innerHTML = checks.map((item) => "<div class=\"check-item " + (item[0] ? "" : "warn") + "\"><i>" + (item[0] ? "✓" : "!") + "</i><span>" + (item[0] ? item[1] : item[2]) + "</span></div>").join("");
   }
 
   // ---------------------------------------------------------------------------
   // CCS concepts picker
   // ---------------------------------------------------------------------------
-  function initCcsPicker() {
+  // The concept list is grouped; group names are translated, concept names are the official ACM CCS labels.
+  function fillCcsSelect() {
     const select = $("ccsSelect");
-    const groups = [...new Set(CCS_OPTIONS.map((o) => o.group))];
-    groups.forEach((group) => {
-      const optgroup = document.createElement("optgroup"); optgroup.label = group;
+    const selected = select.value;
+    select.querySelectorAll("optgroup").forEach((g) => g.remove());
+    [...new Set(CCS_OPTIONS.map((o) => o.group))].forEach((group) => {
+      const optgroup = document.createElement("optgroup"); optgroup.label = t(group);
       CCS_OPTIONS.filter((o) => o.group === group).forEach((o) => { const opt = document.createElement("option"); opt.value = o.id; opt.textContent = o.label; optgroup.appendChild(opt); });
       select.appendChild(optgroup);
     });
+    select.value = selected;
+  }
+  function initCcsPicker() {
+    const select = $("ccsSelect");
+    fillCcsSelect();
     try { state.ccs = JSON.parse(localStorage.getItem(ccsStorageKey) || "[]").filter((c) => c && c.id && c.desc); } catch (_) { state.ccs = []; }
     $("ccsAdd").addEventListener("click", addCcsConcept);
     select.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); addCcsConcept(); } });
@@ -1249,8 +1287,8 @@ ${rights.join("\n")}
   }
   function addCcsConcept() {
     const id = $("ccsSelect").value; const option = CCS_OPTIONS.find((o) => o.id === id);
-    if (!option) return showToast("请先在下拉框里选择一个概念");
-    if (state.ccs.some((c) => c.id === id)) return showToast("该概念已添加");
+    if (!option) return showToast(t("ccs.toast.select"));
+    if (state.ccs.some((c) => c.id === id)) return showToast(t("ccs.toast.duplicate"));
     state.ccs.push({ id: option.id, desc: option.desc, significance: $("ccsSignificance").value });
     $("ccsSelect").value = "";
     persistCcs(); renderCcsChips(); applyFixedTemplate(); updatePreview();
@@ -1258,11 +1296,11 @@ ${rights.join("\n")}
   function persistCcs() { try { localStorage.setItem(ccsStorageKey, JSON.stringify(state.ccs)); } catch (_) { /* storage unavailable */ } }
   function renderCcsChips() {
     const host = $("ccsChosen");
-    if (!state.ccs.length) { host.innerHTML = '<div class="content-empty" style="padding:8px">尚未选择 CCS 概念</div>'; return; }
-    const sigOptions = (value) => ["500", "300", "100"].map((v) => '<option value="' + v + '"' + (v === value ? " selected" : "") + ">" + ({ 500: "主要 500", 300: "次要 300", 100: "相关 100" })[v] + "</option>").join("");
+    if (!state.ccs.length) { host.innerHTML = '<div class="content-empty" style="padding:8px">' + escapeHtml(t("ccs.none")) + '</div>'; return; }
+    const sigOptions = (value) => ["500", "300", "100"].map((v) => '<option value="' + v + '"' + (v === value ? " selected" : "") + ">" + escapeHtml(t("ccs.sig." + v)) + "</option>").join("");
     host.innerHTML = state.ccs.map((c, i) => {
       const [top, leaf] = c.desc.includes("~") ? c.desc.split("~") : [c.desc, ""];
-      return '<div class="ccs-chip"><span>' + escapeHtml(leaf || top) + '<small>' + escapeHtml(top) + ' · ' + escapeHtml(c.id) + '</small></span><select data-sig="' + i + '" style="width:92px;margin:0;padding:4px">' + sigOptions(c.significance) + '</select><button type="button" data-remove="' + i + '" title="移除">×</button></div>';
+      return '<div class="ccs-chip"><span>' + escapeHtml(leaf || top) + '<small>' + escapeHtml(top) + ' · ' + escapeHtml(c.id) + '</small></span><select data-sig="' + i + '" style="width:92px;margin:0;padding:4px">' + sigOptions(c.significance) + '</select><button type="button" data-remove="' + i + '" title="' + escapeHtml(t("ccs.remove")) + '">×</button></div>';
     }).join("");
   }
   // \begin{CCSXML} block + \ccsdesc lines, in the exact form the ACM CCS tool emits.
@@ -1613,7 +1651,7 @@ ${rights.join("\n")}
       for (const path of state.templateEntries) zip.file(path, await fixedZip.file(path).async("arraybuffer"));
     } catch (error) {
       console.error(error);
-      showToast("内置模板资源未能加载，请刷新页面后重试");
+      showToast(t("toast.templateFailed"));
       return;
     }
     zip.file(state.templateMainPath, buildLatex());
@@ -1627,7 +1665,7 @@ ${rights.join("\n")}
     imageManifest(doc).forEach((name, src) => { if (src.startsWith("data:")) zip.file(mainDir + "figures/" + name, dataUrlBase64(src), { base64: true }); });
     const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
     downloadBlob(blob, safeBaseName(state.file.name) + "-LaTeX-Project.zip");
-    showToast("内置 ACM 模板 LaTeX 项目已生成");
+    showToast(t("toast.projectGenerated"));
   }
 
 
@@ -1650,8 +1688,9 @@ ${rights.join("\n")}
     $("paperTitle").textContent = "Your Paper Title"; $("paperAbstract").textContent = "Upload a Word manuscript to generate an ACM formatted preview."; $("paperKeywords").textContent = "conference paper, intelligent typesetting";
     $("paperAuthors").innerHTML = "<div><b>Author Name</b><span>Institution</span><span>City, Country</span><span>author@example.com</span></div>";
     els.body.innerHTML = "<section><h2>1 INTRODUCTION</h2><p>The manuscript body, figures, tables, and references will appear here after upload.</p></section><section><h2>2 DOCUMENT CHECK</h2><p>After recognition, verify paper metadata before exporting.</p></section>";
-    $("contentEditor").innerHTML = '<div class="content-empty">上传 Word 后将在这里显示全部正文内容</div>';
-    $("previewStatus").textContent = "内置 ACM Manuscript 单栏模板已就绪"; updatePreview(); setStep("import");
+    $("contentEditor").innerHTML = '<div class="content-empty">' + escapeHtml(t("review.bodyEmpty")) + '</div>';
+    state.fileMetaKey = null; state.recognitionKey = null;
+    applyFixedTemplate(); updatePreview(); setStep("import");
   }
 
   function schedulePagination() {
@@ -1751,7 +1790,6 @@ ${rights.join("\n")}
     }).join("");
   }
   function escapeHtml(value) { return String(value || "").replace(/[&<>\"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c])); }
-  function downloadText(name, text, type) { downloadBlob(new Blob([text], { type }), name); showToast(name + " 已下载"); }
   function downloadBlob(blob, name) { const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1500); }
   function showToast(message) { const toast = $("toast"); toast.textContent = message; toast.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove("show"), 2400); }
 })();
