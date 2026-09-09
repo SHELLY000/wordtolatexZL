@@ -65,11 +65,14 @@
     "⪯": "\\preceq", "⪰": "\\succeq", "∼": "\\sim", "≜": "\\triangleq", "≔": "\\coloneqq", "≐": "\\doteq", "∴": "\\therefore", "∵": "\\because",
     "−": "-", "‐": "-", "–": "-", "—": "-", "ⅆ": "\\mathrm{d}", "ⅇ": "\\mathrm{e}", "ⅈ": "\\mathrm{i}", "ⅉ": "\\mathrm{j}", "ⅅ": "\\mathrm{D}",
     "△": "\\triangle", "□": "\\square", "◊": "\\diamond", "★": "\\bigstar", "†": "\\dagger", "‡": "\\ddagger", "§": "\\S", "¶": "\\P",
-    "¬": "\\neg", "ℰ": "\\mathcal{E}", "ℒ": "\\mathcal{L}", "ℋ": "\\mathcal{H}", "ℱ": "\\mathcal{F}", "𝒩": "\\mathcal{N}",
+    "ℰ": "\\mathcal{E}", "ℒ": "\\mathcal{L}", "ℋ": "\\mathcal{H}", "ℱ": "\\mathcal{F}", "𝒩": "\\mathcal{N}",
     "‰": "\\text{\\textperthousand}", "∁": "\\complement", "⊤": "\\top", "⊥": "\\bot"
   };
   // characters that are special in LaTeX
   const ESCAPES = { "%": "\\%", "&": "\\&", "#": "\\#", "$": "\\$", "_": "\\_", "{": "\\{", "}": "\\}", "~": "\\sim", "\\": "\\backslash", "^": "\\hat{}" };
+  // inside \text{...} (text mode) \backslash and \hat{} are not allowed, so text runs use the text-mode commands
+  const TEXT_ESCAPES = { "%": "\\%", "&": "\\&", "#": "\\#", "$": "\\$", "_": "\\_", "{": "\\{", "}": "\\}", "~": "\\textasciitilde{}", "\\": "\\textbackslash{}", "^": "\\textasciicircum{}" };
+  function textModeEscape(text) { return Array.from(text).map((ch) => TEXT_ESCAPES[ch] || ch).join(""); }
   const FUNCTIONS = ["sin", "cos", "tan", "cot", "sec", "csc", "arcsin", "arccos", "arctan", "sinh", "cosh", "tanh", "coth", "log", "ln", "lg", "exp",
     "max", "min", "sup", "inf", "lim", "liminf", "limsup", "det", "dim", "gcd", "hom", "ker", "arg", "deg", "Pr"];
   const NARY = { "∑": "\\sum", "∏": "\\prod", "∐": "\\coprod", "∫": "\\int", "∬": "\\iint", "∭": "\\iiint", "∮": "\\oint", "∯": "\\oint",
@@ -93,7 +96,6 @@
     const v = p.getAttributeNS ? (p.getAttributeNS(M_NS, "val") || p.getAttribute("m:val") || p.getAttribute("val")) : p.getAttribute("m:val");
     return v === null || v === "" ? (p.hasAttribute && (p.hasAttribute("m:val") || p.hasAttributeNS(M_NS, "val")) ? "" : fallback) : v;
   }
-  const flag = (el, prName, name, dflt) => { const v = prop(el, prName, name, dflt); return v === "1" || v === "true" || v === "on" || (v === "" ? true : v === dflt && dflt === true); };
 
   // ---------------------------------------------------------------------------
   // Text runs
@@ -130,7 +132,7 @@
     const nor = pr && kid(pr, "nor") !== null;               // "normal text" toggle
     const scr = pr ? prop(r, "rPr", "scr", "roman") : "roman";
     const chars = Array.from(text).map(normalizeChar);
-    if (nor) return "\\text{" + chars.map((ch) => (ESCAPES[ch] ? charToLatex(ch, true) : ch)).join("") + "}";
+    if (nor) return "\\text{" + textModeEscape(chars.join("")) + "}";
     const trimmed = text.trim();
     if (FUNCTIONS.includes(trimmed) && (sty === "p" || ctx.inFName)) return "\\" + trimmed;
     const tokens = [];
@@ -163,7 +165,7 @@
     for (let c = el.firstChild; c; c = c.nextSibling) {
       if (c.nodeType !== 1) continue;
       if (isM(c)) { if (/Pr$/.test(c.localName) || c.localName === "ctrlPr") continue; parts.push(conv(c, ctx)); }
-      else if (isW(c) && c.localName === "r") { const t = c.textContent; if (t.trim()) parts.push("\\text{" + t + "}"); }
+      else if (isW(c) && c.localName === "r") { const t = c.textContent; if (t.trim()) parts.push("\\text{" + textModeEscape(t) + "}"); }
       else if (c.firstChild) parts.push(convChildren(c, ctx)); // w:ins, w:smartTag, etc.
     }
     return joinTokens(parts);
@@ -261,6 +263,9 @@
   // ---------------------------------------------------------------------------
   // Paragraph / document level
   // ---------------------------------------------------------------------------
+  const insideMath = (n) => { for (let a = n.parentNode; a && a.nodeType === 1; a = a.parentNode) if (isM(a)) return true; return false; };
+  // A run holding nothing but text / tabs / field markers (no footnote references, drawings, deleted text, ...).
+  const isPlainTextRun = (r) => Array.from(r.childNodes).every((n) => n.nodeType !== 1 || (isW(n) && /^(rPr|t|tab|fldChar|instrText|softHyphen|noBreakHyphen)$/.test(n.localName)));
   function mathNodesOf(wP) {
     const out = [];
     (function walk(n) {
@@ -336,9 +341,10 @@
         t.setAttribute("xml:space", "preserve");
         t.appendChild(doc.createTextNode("\uE000EQ" + e.id + "\uE000"));
         r.appendChild(t);
-        // a numbered inline equation followed by "(1)": drop the literal number, the wrapper re-adds it via \tag
+        // A numbered equation: the paragraph's whole non-math text is just "(1)" (that is what set `tag`), but Word usually splits it
+        // over several runs ("(", "1", ")", a tab, or a SEQ field), so drop every plain run outside the math rather than looking for one that matches.
         if (e.tag) {
-          for (const w of Array.from(p.getElementsByTagNameNS(W_NS, "r"))) { if (EQNUM_RE.test(w.textContent)) w.parentNode.removeChild(w); }
+          for (const w of Array.from(p.getElementsByTagNameNS(W_NS, "r"))) { if (!insideMath(w) && isPlainTextRun(w)) w.parentNode.removeChild(w); }
         }
         e.node.parentNode.replaceChild(r, e.node);
       }

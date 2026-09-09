@@ -54,3 +54,24 @@ test("prepareDocumentXml replaces every equation with a placeholder run", () => 
   assert.equal((out.xml.match(O.PLACEHOLDER_RE) || []).length, 2);
   assert.ok(!/<m:oMath/.test(out.xml));
 });
+
+// --- 0.2.1 regressions -------------------------------------------------------------------------
+test("plain Word text runs inside a formula are escaped for text mode", () => {
+  // <w:r> inside <m:oMath> (tracked changes, smart tags, pasted text) used to land in \text{} verbatim
+  const doc = "<w:document " + NS + "><w:body><w:p><m:oMath>" + r("r=") + "<w:r><w:t>x_max % of {n}</w:t></w:r></m:oMath></w:p></w:body></w:document>";
+  assert.equal(O.extractEquations(doc)[0].latex, "r=\\text{x\\_max \\% of \\{n\\}}");
+});
+test("'normal text' runs use text-mode escapes (no \\backslash / \\hat{} inside \\text{})", () => {
+  assert.equal(one(r("a\\b^2 ~ 50%", "<m:rPr><m:nor/></m:rPr>")).latex, "\\text{a\\textbackslash{}b\\textasciicircum{}2 \\textasciitilde{} 50\\%}");
+});
+test("an equation number split over several runs is removed completely", () => {
+  // Word typically writes "\t(1)" as four runs; only whole-run matches used to be dropped, leaving "(1)" next to \tag{1}
+  const doc = "<w:document " + NS + "><w:body><w:p><m:oMath>" + r("E=mc^2") + "</m:oMath>" +
+    "<w:r><w:tab/></w:r><w:r><w:t>(</w:t></w:r><w:r><w:t>1</w:t></w:r><w:r><w:t>)</w:t></w:r>" +
+    "<w:r><w:footnoteReference w:id=\"1\"/></w:r></w:p></w:body></w:document>";
+  const out = O.prepareDocumentXml(doc);
+  assert.equal(out.equations[0].tag, "1");
+  assert.ok(!/<w:t>[(1)]<\/w:t>/.test(out.xml), "no literal ( 1 ) runs left");
+  assert.ok(!/<w:tab\/>/.test(out.xml), "the tab before the number is gone too");
+  assert.ok(/footnoteReference/.test(out.xml), "runs that are not plain text are kept");
+});

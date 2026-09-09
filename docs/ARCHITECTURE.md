@@ -17,16 +17,21 @@ WordTeX is a single-page application (no server) plus a Node harness that drives
    (numbered/roman/lettered bold paragraphs), title scoring, labelled blocks (abstract / CCS / keywords with
    stop conditions and length caps), front-matter author parsing, plain numbered headings, captions, references.
 5. **Review panel** — one editable block per top-level element with a type label and a type selector; edits are
-   written back to `state.bodyHtml`.
-6. **Preview** — the body is cloned into the template preview; `renderMathIn` renders `span.math` with KaTeX
-   (errors are marked and counted); the preview is paginated.
+   written back to `state.bodyHtml` (batched, 200 ms; flushed before step changes and exports).
+6. **Preview** — the body is re-rendered only when `state.bodyHtml` changed (metadata edits touch the front
+   matter only); `renderMathIn` renders `span.math` with KaTeX, memoised per formula (errors are marked and
+   counted, the source stays visible); the whole-body scans behind the checklist are cached in `bodyStats()`;
+   the preview is paginated (debounced).
 7. **LaTeX generation (`buildLatex`)** — `nodeToLatex` walks the HTML: headings (with `\FloatBarrier`), math spans
    (`$…$`, `\[…\]`, `\begin{equation}\tag{n}`), tables (`tableToLatex`: rowspan/colspan grid → `multirow` /
    `multicolumn` / `cline`, `xltabular` for long tables), figures (`[!htbp]` or `[H]`), footnotes, lists,
-   placeholders for unsupported images/charts, `thebibliography` from the reference list; `linkCitations`
-   rewrites `[n]` / author–year citations to `\cite`; `mergeIntoTemplate` fills the acmart template
+   images inside table cells (`\includegraphics` sized to the cell, no float), placeholders for unsupported
+   images/charts, `thebibliography` from the reference list; `linkCitations` rewrites `[n]` / author–year
+   citations to `\cite` outside math, `\url`, `\includegraphics`, `\label`, `\ref` and `\cite` arguments;
+   `imageManifest` stores each distinct picture once and `uniqueLabel` keeps `\label{}`s unique; `mergeIntoTemplate` fills the acmart template
    (packages, float parameters, conditional `xeCJK`, short title, authors with inferred countries).
-8. **Export** — the project ZIP contains `main.tex`, the acmart class files, figures, `latexmkrc` and build scripts.
+8. **Export** — the project ZIP contains `main.tex`, the acmart class files (decoded from the inlined base64 with
+   `JSZip.loadAsync(…, { base64: true })`), figures, `latexmkrc` and build scripts.
 
 ## Invariants
 

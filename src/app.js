@@ -93,7 +93,7 @@
   const URL_RE = /((?:https?:\/\/|www\.)[^\s<>"'（）()]+)/g;
 
   const $ = (id) => document.getElementById(id);
-  const state = { step: "import", file: null, templateFile: { name: "内置 acmart 模板" }, templateText: "", templateZip: null, templateEntries: [], templateMainPath: "main.tex", templateType: "acm", layoutMode: "single", fixedAssetsPromise: null, conference: {}, sourceHtml: "", bodyHtml: "", zoom: 82, metadata: {}, authors: [] };
+  const state = { step: "import", file: null, templateFile: { name: "内置 acmart 模板" }, templateText: "", templateZip: null, templateEntries: [], templateMainPath: "main.tex", templateType: "acm", layoutMode: "single", fixedAssetsPromise: null, conference: {}, sourceHtml: "", bodyHtml: "", renderedBodyHtml: "", bodyStatsCache: null, zoom: 82, metadata: {}, authors: [], equations: [], charts: 0, oleObjects: 0, equationsDropped: 0, mathErrors: 0, citeStats: null, floatMode: "auto" };
   const els = {
     fileInput: $("fileInput"), dropZone: $("dropZone"), fileCard: $("fileCard"), fileName: $("fileName"), fileMeta: $("fileMeta"),
     emptyNotice: $("emptyNotice"), next: $("nextBtn"), back: $("backBtn"), paper: $("paper"), body: $("paperBody"),
@@ -147,7 +147,7 @@
   $("authorEditor").addEventListener("input", handleAuthorEdit);
   $("authorEditor").addEventListener("change", handleAuthorEdit);
   $("authorEditor").addEventListener("click", handleAuthorAction);
-  $("contentEditor").addEventListener("input", handleContentEdit);
+  $("contentEditor").addEventListener("input", scheduleContentEdit);
   $("contentEditor").addEventListener("change", (event) => { if (event.target.classList.contains("block-type")) retagBlock(event.target); });
   if ($("floatMode")) $("floatMode").addEventListener("change", (event) => { state.floatMode = event.target.value; });
   initCcsPicker();
@@ -157,6 +157,7 @@
   loadFixedAssets().catch((error) => console.error(error));
 
   function setStep(step) {
+    flushContentEdit();
     state.step = step;
     Object.values(labels).forEach((item) => $(item.panel).classList.add("hidden"));
     $(labels[step].panel).classList.remove("hidden");
@@ -326,10 +327,7 @@ ${rights.join("\n")}
 
   async function loadFixedAssets() {
     if (state.templateZip) return state.templateZip;
-    if (!state.fixedAssetsPromise) state.fixedAssetsPromise = fetch("data:application/zip;base64,__ACMART_TEMPLATE_B64__").then((response) => {
-      if (!response.ok) throw new Error("内置模板资源加载失败");
-      return response.arrayBuffer();
-    }).then((buffer) => JSZip.loadAsync(buffer)).then((zip) => {
+    if (!state.fixedAssetsPromise) state.fixedAssetsPromise = JSZip.loadAsync("__ACMART_TEMPLATE_B64__", { base64: true }).then((zip) => {
       state.templateZip = zip;
       state.templateEntries = Object.keys(zip.files).filter((path) => !zip.files[path].dir && safeZipPath(path));
       return zip;
@@ -337,15 +335,6 @@ ${rights.join("\n")}
     return state.fixedAssetsPromise;
   }
 
-  function detectTemplateType(text) {
-    const doc = (/\\documentclass(?:\[([^\]]*)\])?\{([^}]+)\}/.exec(text) || []);
-    const options = (doc[1] || "").toLowerCase(), cls = (doc[2] || "").toLowerCase();
-    if (/ieeetran|ieee/.test(cls)) return "ieee";
-    if (/llncs|svjour|springer/.test(cls)) return "llncs";
-    if (/acmart/.test(cls)) return "acm";
-    if (/twocolumn/.test(options) || /\\twocolumn/.test(text)) return "twocolumn";
-    return "article";
-  }
 
   function templateLabel(type) { return ({ acm: "ACM Manuscript 单栏", ieee: "IEEE", llncs: "Springer LNCS", twocolumn: "通用模板", article: "通用单栏" })[type] || "LaTeX 模板"; }
 
@@ -733,7 +722,7 @@ ${rights.join("\n")}
       const blockText = block ? block.textContent.replace(/\s+/g, " ").trim() : "";
       const textBesides = blockText.replace(EQUATION_NUMBER_RE, "").trim();
       const imagesInBlock = block ? block.querySelectorAll("img").length : 1;
-      if (block && /^(TD|TH|LI)$/.test(block.tagName)) { img.classList.add("img-inline"); return; }
+      if (img.closest("td,th,li")) { img.classList.add("img-inline"); return; } // mammoth wraps cell content in <p>, so test the ancestor, not `block`
       if (block && block.tagName === "P" && imagesInBlock === 1 && textBesides) { img.classList.add("img-inline"); return; }
       if (block && block.tagName === "P" && !textBesides) {
         const hasCaption = isCaptionNode(block.nextElementSibling, CAPTION_RE) || isCaptionNode(block.previousElementSibling, CAPTION_RE);
@@ -766,20 +755,19 @@ ${rights.join("\n")}
     });
   }
 
-  // mammoth cannot read Word equations (m:oMath); count them so the user is told exactly what was lost.
-  async function countWordEquations(arrayBuffer) {
-    try {
-      const zip = await JSZip.loadAsync(arrayBuffer);
-      const entry = zip.file("word/document.xml");
-      if (!entry) return 0;
-      const xml = await entry.async("string");
-      return (xml.match(/<m:oMath[\s>]/g) || []).length;
-    } catch (_) { return 0; }
-  }
 
-  function unsupportedImageCount(html) {
-    const wrap = document.createElement("div"); wrap.innerHTML = html || "";
-    return [...wrap.querySelectorAll("img")].filter((img) => /^data:image\/(x-emf|x-wmf|emf|wmf|gif|bmp|tiff)/i.test(img.src)).length;
+  // Whole-body scans are cached per bodyHtml so that typing in a metadata field does not re-parse the manuscript twice per keystroke.
+  function bodyStats() {
+    const html = state.bodyHtml || "";
+    if (state.bodyStatsCache && state.bodyStatsCache.html === html) return state.bodyStatsCache;
+    const wrap = document.createElement("div"); wrap.innerHTML = html;
+    state.bodyStatsCache = {
+      html,
+      unsupportedImages: [...wrap.querySelectorAll("img")].filter((img) => /^data:image\/(x-emf|x-wmf|emf|wmf|gif|bmp|tiff)/i.test(img.src)).length,
+      tableImages: wrap.querySelectorAll("table img").length,
+      cjk: cjkCount(wrap.textContent)
+    };
+    return state.bodyStatsCache;
   }
 
   function cjkCount(text) { return (String(text || "").match(/[\u4e00-\u9fff]/g) || []).length; }
@@ -1007,11 +995,6 @@ ${rights.join("\n")}
     });
   }
 
-  function countFollowingParagraphs(heading) {
-    let count = 0, node = heading.nextElementSibling;
-    while (node && !/^H[1-4]$/.test(node.tagName)) { if (node.textContent.trim()) count++; node = node.nextElementSibling; }
-    return count;
-  }
 
   function populateFields(data) {
     els.title.value = data.title;
@@ -1057,7 +1040,12 @@ ${rights.join("\n")}
     renderContentEditor();
   }
 
+  // Rebuilding the body re-parses and re-typesets the whole manuscript, so keystrokes are batched; exports flush any pending edit first.
+  let contentEditTimer = null;
+  function scheduleContentEdit() { clearTimeout(contentEditTimer); contentEditTimer = setTimeout(handleContentEdit, 200); }
+  function flushContentEdit() { if (contentEditTimer) handleContentEdit(); }
   function handleContentEdit() {
+    clearTimeout(contentEditTimer); contentEditTimer = null;
     const html = [...$("contentEditor").querySelectorAll(".content-block-value")].map((editor) => editor.innerHTML.trim()).filter(Boolean).join("\n");
     state.bodyHtml = cleanHtml(html);
     updatePreview();
@@ -1136,8 +1124,8 @@ ${rights.join("\n")}
     const authorRecords = state.authors.filter((a) => a.name) || [];
     const names = authorRecords.length ? authorRecords.map((a) => a.name) : splitAuthors(meta.authors);
     $("paperAuthors").innerHTML = (authorRecords.length ? authorRecords : [{ name: names[0] || "Author Name", institution: "Affiliation not provided", city: "", country: "", email: "", orcid: "", corresponding: false }]).map((author) => "<div><b>" + escapeHtml(author.name) + (author.corresponding ? "<sup>*</sup>" : "") + "</b><span>" + escapeHtml(authorAffiliation(author) || "Affiliation not provided") + "</span>" + (author.email ? "<span>" + escapeHtml(author.email) + "</span>" : "") + (author.orcid ? "<span>ORCID: " + escapeHtml(author.orcid) + "</span>" : "") + "</div>").join("");
-    els.body.innerHTML = state.bodyHtml || els.body.innerHTML;
-    renderMathIn(els.body);
+    // The body only changes when the manuscript itself is edited; metadata keystrokes must not re-render (and re-typeset) the whole paper.
+    if (state.bodyHtml && state.bodyHtml !== state.renderedBodyHtml) { els.body.innerHTML = state.bodyHtml; renderMathIn(els.body); state.renderedBodyHtml = state.bodyHtml; }
     const firstAuthor = names[0] || "Author";
     const manuscript = conferenceFormat() === "manuscript";
     const copyright = conferenceCopyright();
@@ -1171,6 +1159,7 @@ ${rights.join("\n")}
   }
 
   // Equations are stored as LaTeX source in <span class="math">; the preview renders them with KaTeX when it is bundled.
+  const mathRenderCache = new Map();
   function renderMathIn(root) {
     state.mathErrors = 0;
     root.querySelectorAll("span.math").forEach((span) => {
@@ -1178,14 +1167,18 @@ ${rights.join("\n")}
       const display = span.dataset.display === "1";
       const tag = span.dataset.tag;
       if (typeof katex === "undefined") { span.classList.add("math-source"); return; }
-      try {
-        katex.render(latex, span, { displayMode: display, throwOnError: true, output: "html", strict: "ignore" });
-        if (display && tag) { const num = document.createElement("span"); num.className = "eq-number"; num.textContent = "(" + tag + ")"; span.appendChild(num); }
-      } catch (error) {
-        state.mathErrors++;
-        span.classList.add("math-error");
-        span.title = String(error.message || error);
+      // Typesetting is memoised per (mode, source): re-rendering the body after an edit only pays for formulas that changed.
+      const key = (display ? "D" : "I") + latex;
+      let entry = mathRenderCache.get(key);
+      if (!entry) {
+        try { entry = { html: katex.renderToString(latex, { displayMode: display, throwOnError: true, output: "html", strict: "ignore" }) }; }
+        catch (error) { entry = { error: String(error.message || error) }; }
+        if (mathRenderCache.size > 3000) mathRenderCache.clear();
+        mathRenderCache.set(key, entry);
       }
+      if (entry.error) { state.mathErrors++; span.classList.add("math-error"); span.title = entry.error; return; } // keeps the LaTeX source visible
+      span.innerHTML = entry.html;
+      if (display && tag) { const num = document.createElement("span"); num.className = "eq-number"; num.textContent = "(" + tag + ")"; span.appendChild(num); }
     });
   }
 
@@ -1200,6 +1193,7 @@ ${rights.join("\n")}
 
   function updateChecks() {
     const meta = currentMeta();
+    const stats = bodyStats();
     const checks = [
       [!!state.templateFile && /\\begin\s*\{document\}/.test(state.templateText), "LaTeX 模板结构有效", "模板结构需要复核"],
       [!!meta.title, "标题已识别", "缺少论文标题"],
@@ -1215,13 +1209,14 @@ ${rights.join("\n")}
       [!state.equationsDropped && !(state.mathErrors > 0), (state.equations || []).length ? "已转换 " + state.equations.length + " 处 Word 公式为 LaTeX" : "未发现 Word 公式", state.equationsDropped ? state.equationsDropped + " 处 Word 公式转换失败，请在 Word 中改为图片或手写 LaTeX" : state.mathErrors + " 处公式 LaTeX 有语法错误（预览中标红），请在校对框修改"],
       [!state.oleObjects, "未发现旧式公式编辑器对象", state.oleObjects + " 处 MathType/公式编辑器 3.0 对象：Word 只保存了 WMF 预览图，已用占位框代替，请重新输入公式或提供 PNG"],
       [!state.charts, "未发现 Word 原生图表", state.charts + " 处 Word 原生图表无法导出图片，已在原位置放置占位框，请另存为 PNG 后替换"],
-      [unsupportedImageCount(state.bodyHtml) === 0, "图片格式可用于 LaTeX", unsupportedImageCount(state.bodyHtml) + " 张 EMF/WMF/GIF/BMP 图片已用占位框代替（项目仍可编译），请在 Word 中改为 PNG"],
+      [stats.unsupportedImages === 0, "图片格式可用于 LaTeX", stats.unsupportedImages + " 张 EMF/WMF/GIF/BMP 图片已用占位框代替（项目仍可编译），请在 Word 中改为 PNG"],
+      [!stats.tableImages, "表格内无图片", stats.tableImages + " 张图片位于表格单元格内，已按单元格宽度嵌入 LaTeX 表格，导出后请检查尺寸"],
       [!(state.metadata.inferredHeadings > 0), "章节标题来自 Word 样式", state.metadata.inferredHeadings + " 个标题由加粗文字推断，请在校对框确认层级"],
       [!(state.citeStats && state.citeStats.unlinked > 0), state.citeStats && state.citeStats.linked ? "文内引用已关联参考文献（" + state.citeStats.linked + " 处）" : "文内引用关联：导出时处理", (state.citeStats ? state.citeStats.unlinked : 0) + " 处文内引用未能与参考文献匹配，导出后请检查"],
       [state.authors.every((a) => !a.name || a.country), "作者国家已填写", state.authors.filter((a) => a.name && !a.country).length + " 位作者缺少国家/地区（ACM 模板必填）"],
       [(meta.keywords || "").length < 400 && (meta.abstract || "").length < 6000, "摘要/关键词长度正常", "摘要或关键词字段过长，可能吞入了正文，请检查"],
       [!!meta.ccs, "CCS 概念已选择", "未选择 CCS 概念（ACM 出版需要，非 ACM 会议可忽略）" + (state.metadata.ccsText ? "；原稿写有：" + state.metadata.ccsText.slice(0, 80) : "")],
-      [true, cjkCount(meta.title + meta.abstract + meta.keywords + (state.bodyHtml || "").replace(/<[^>]+>/g, "")) === 0 ? "无中文字符" : "含中文字符：已自动加载 xeCJK（需要系统有中文字体）", ""]
+      [true, cjkCount(meta.title + meta.abstract + meta.keywords) + stats.cjk === 0 ? "无中文字符" : "含中文字符：已自动加载 xeCJK（需要系统有中文字体）", ""]
     ];
     const passed = checks.filter((item) => item[0]).length;
     $("qualityScore").textContent = Math.round((passed / checks.length) * 100) + "% 完整";
@@ -1300,7 +1295,8 @@ ${rights.join("\n")}
     const meta = currentMeta();
     const parser = document.createElement("div");
     parser.innerHTML = state.bodyHtml;
-    parser.querySelectorAll("img").forEach((img, i) => { img.dataset.latexName = "word-figure-" + String(i + 1).padStart(2, "0") + imageExtension(img.src); });
+    imageManifest(parser);
+    state.usedLabels = new Set();
     classifyImages(parser);
     // Resolve figure/table captions up front so a caption paragraph that precedes its table is not emitted twice.
     parser.querySelectorAll("img.img-figure").forEach((img) => { img.__caption = adjacentCaption(img.closest("p,figure") || img, CAPTION_RE, true); });
@@ -1314,14 +1310,23 @@ ${rights.join("\n")}
     return mergeIntoTemplate(state.templateText, meta, bodyTex.trim());
   }
 
+  // Regions where "[3]" / "(Author, 2024)" must never be rewritten: math (\sqrt[3]{x}!), URLs, graphics, labels and existing \cite.
+  const CITE_PROTECT_RE = /\\\[[\s\S]*?\\\]|\\begin\{(equation\*?|align\*?|aligned|gather\*?|multline\*?)\}[\s\S]*?\\end\{\1\}|(?<!\\)\$(?:\\.|[^$\\\n])*\$|\\(?:url|href|includegraphics|label|ref|cite)(?:\[[^\]]*\])?\{[^}]*\}/g;
+  function outsideProtected(tex, fn) {
+    let out = "", last = 0;
+    for (const m of tex.matchAll(CITE_PROTECT_RE)) { out += fn(tex.slice(last, m.index)) + m[0]; last = m.index + m[0].length; }
+    return out + fn(tex.slice(last));
+  }
+
   // "[3]", "[2,5]", "[4-6]" and "(Author et al., 2024)" in the body become \cite{refN} when they match the reference list.
   function linkCitations(tex, items) {
     state.citeStats = { linked: 0, unlinked: 0 };
     const split = tex.indexOf("\\begin{thebibliography}");
-    let body = split >= 0 ? tex.slice(0, split) : tex, tail = split >= 0 ? tex.slice(split) : "";
+    const body = split >= 0 ? tex.slice(0, split) : tex, tail = split >= 0 ? tex.slice(split) : "";
     const n = items.length;
     if (!n) return tex;
-    body = body.replace(/\[(\d{1,3}(?:\s*[,，–-]\s*\d{1,3})*)\]/g, (m, inner) => {
+    const index = items.map((text, i) => { const m = /^([A-Z][A-Za-z'’\-]+)/.exec(text.replace(/^\W+/, "")); const y = /\b(19|20)\d{2}[a-z]?\b/.exec(text); return { key: "ref" + (i + 1), surname: m ? m[1].toLowerCase() : "", year: y ? y[0] : "" }; });
+    const linkBrackets = (seg) => seg.replace(/\[(\d{1,3}(?:\s*[,，–-]\s*\d{1,3})*)\]/g, (m, inner) => {
       const keys = [];
       for (const part of inner.split(/\s*[,，]\s*/)) {
         const range = /^(\d+)\s*[–-]\s*(\d+)$/.exec(part);
@@ -1332,8 +1337,7 @@ ${rights.join("\n")}
       state.citeStats.linked++;
       return "\\cite{" + keys.join(",") + "}";
     });
-    const index = items.map((text, i) => { const m = /^([A-Z][A-Za-z'’\-]+)/.exec(text.replace(/^\W+/, "")); const y = /\b(19|20)\d{2}[a-z]?\b/.exec(text); return { key: "ref" + (i + 1), surname: m ? m[1].toLowerCase() : "", year: y ? y[0] : "" }; });
-    body = body.replace(/\(([^()]{3,160})\)/g, (m, inner) => {
+    const linkParens = (seg) => seg.replace(/\(([^()]{3,160})\)/g, (m, inner) => {
       const cites = inner.split(/\s*;\s*/);
       const keys = [];
       for (const cite of cites) {
@@ -1346,7 +1350,7 @@ ${rights.join("\n")}
       state.citeStats.linked++;
       return "\\cite{" + keys.join(",") + "}";
     });
-    return body + tail;
+    return outsideProtected(body, (seg) => linkParens(linkBrackets(seg))) + tail;
   }
 
   function normalizeKeywords(value) { return String(value || "").split(/\s*[;；,，]\s*/).map((k) => k.trim()).filter(Boolean).join(", "); }
@@ -1362,7 +1366,7 @@ ${rights.join("\n")}
       CJK: hasCjk ? "\\IfFileExists{xeCJK.sty}{\\usepackage{xeCJK}\\IfFontExistsTF{Noto Serif CJK SC}{\\setCJKmainfont{Noto Serif CJK SC}}{\\IfFontExistsTF{SimSun}{\\setCJKmainfont{SimSun}}{\\IfFontExistsTF{Songti SC}{\\setCJKmainfont{Songti SC}}{}}}}{}" : "",
       AUTHORS: authorLatex(meta, state.templateType),
       SHORTAUTHORS: authorNames.length >= 3 ? "\\renewcommand{\\shortauthors}{" + texEscape(authorNames[0]) + " et al.}\n" : "",
-      ABSTRACT: texEscape(meta.abstract || "Abstract not provided."),
+      ABSTRACT: texText(meta.abstract || "Abstract not provided."),
       CCS: meta.ccs ? meta.ccs + "\n" : "",
       KEYWORDS: texEscape(normalizeKeywords(meta.keywords) || "keywords not provided"),
       CONTENT: bodyTex
@@ -1380,50 +1384,6 @@ ${rights.join("\n")}
     return "\\author{" + authors.map((a) => texEscape(a.name) + (a.corresponding ? "\\thanks{Corresponding author}" : "") + (a.orcid ? " (ORCID: " + texEscape(normalizeOrcid(a.orcid)) + ")" : "")).join(" \\and ") + "\\\\\n\\small " + authors.map((a) => texEscape(authorAffiliation(a))).filter(Boolean).join("; ") + "}";
   }
 
-  function replaceAuthorArea(text, meta, type) {
-    const replacement = authorLatex(meta, type);
-    if (!/\\author\s*(?:\[[^\]]*\])?\s*\{/.test(text)) {
-      const marker = text.search(/\\begin\s*\{abstract\}|\\maketitle\b/);
-      return marker >= 0 ? text.slice(0, marker) + replacement + "\n\n" + text.slice(marker) : text;
-    }
-    if (type === "acm") {
-      const start = text.search(/\\author\s*(?:\[[^\]]*\])?\s*\{/);
-      const end = text.search(/\\begin\s*\{abstract\}/);
-      if (start >= 0 && end > start) return text.slice(0, start) + replacement + "\n\n" + text.slice(end);
-    }
-    if (type === "llncs") text = removeLatexCommand(text, "institute");
-    return replaceLatexCommand(text, "author", replacement.replace(/^\\author/, ""), true);
-  }
-
-  function replaceDocumentBody(text, body) {
-    const titleEnd = text.search(/\\maketitle\b/);
-    const begin = text.search(/\\begin\s*\{document\}/);
-    const abstractEndMatch = /\\end\s*\{abstract\}/g; let abstractEnd = null, match;
-    while ((match = abstractEndMatch.exec(text))) abstractEnd = { index: match.index, length: match[0].length };
-    const startToken = titleEnd >= 0 ? { index: titleEnd, length: "\\maketitle".length } : abstractEnd || { index: begin, length: (text.match(/\\begin\s*\{document\}/) || [""])[0].length };
-    if (startToken.index < 0) return text;
-    const after = startToken.index + startToken.length;
-    const tail = text.slice(after);
-    const endMatch = tail.match(/\\bibliographystyle\b|\\bibliography\s*\{|\\printbibliography\b|\\end\s*\{document\}/);
-    const end = endMatch ? after + endMatch.index : text.length;
-    return text.slice(0, after) + "\n\n% --- Word manuscript content begins ---\n" + body + "\n% --- Word manuscript content ends ---\n\n" + text.slice(end);
-  }
-
-  function replaceLatexEnvironment(text, name, content) {
-    const pattern = new RegExp("\\\\begin\\s*\\{" + name + "\\}[\\s\\S]*?\\\\end\\s*\\{" + name + "\\}", "i");
-    if (pattern.test(text)) return text.replace(pattern, "\\begin{" + name + "}\n" + content + "\n\\end{" + name + "}");
-    const marker = text.search(/\\maketitle\b/);
-    return marker >= 0 ? text.slice(0, marker) + "\\begin{" + name + "}\n" + content + "\n\\end{" + name + "}\n\n" + text.slice(marker) : text;
-  }
-
-  function replaceLatexCommand(text, command, value, valueIncludesBraces) {
-    const range = latexCommandRange(text, command);
-    if (!range) return text;
-    const replacement = "\\" + command + (valueIncludesBraces ? value : "{" + value + "}");
-    return text.slice(0, range.start) + replacement + text.slice(range.end);
-  }
-
-  function removeLatexCommand(text, command) { const range = latexCommandRange(text, command); return range ? text.slice(0, range.start) + text.slice(range.end) : text; }
 
   function latexCommandRange(text, command) {
     const match = new RegExp("\\\\" + command + "\\b").exec(text);
@@ -1484,7 +1444,7 @@ ${rights.join("\n")}
     const display = forceDisplay || span.dataset.display === "1";
     if (!display) return "$" + latex + "$";
     const tag = span.dataset.tag;
-    if (tag) return "\n\\begin{equation}\\tag{" + texEscape(tag) + "}\\label{eq:" + tag.replace(/[^\w.-]/g, "") + "}\n" + latex + "\n\\end{equation}\n";
+    if (tag) return "\n\\begin{equation}\\tag{" + texEscape(tag) + "}\\label{" + uniqueLabel("eq:" + tag.replace(/[^\w.-]/g, "")) + "}\n" + latex + "\n\\end{equation}\n";
     return "\n\\[\n" + latex + "\n\\]\n";
   }
 
@@ -1513,6 +1473,11 @@ ${rights.join("\n")}
     const file = "figures/" + img.dataset.latexName;
     const w = Number(img.dataset.w) || 0, h = Number(img.dataset.h) || 0;
     const pt = (px) => Math.round(px * 72 / 96 * 10) / 10;
+    if (img.classList.contains("img-cell")) {
+      // inside a tabularx cell: no float environment, never wider than the cell, never taller than ~4 cm
+      if (UNSUPPORTED_IMAGE_RE.test(file)) return "\\fbox{\\small [" + file.split(".").pop().toUpperCase() + " image]}";
+      return "\\includegraphics[width=\\linewidth,height=" + (h ? Math.min(pt(h), 120) : 120) + "pt,keepaspectratio]{" + file + "}";
+    }
     if (UNSUPPORTED_IMAGE_RE.test(file)) {
       // WMF/EMF (typically legacy equation-editor objects) cannot be read by XeLaTeX: emit a visible placeholder so the project still compiles.
       const note = "\\fbox{\\parbox{0.85\\linewidth}{\\centering\\small Image " + texEscape(img.dataset.latexName) + " is in " + file.split(".").pop().toUpperCase() + " format (legacy equation editor or metafile). Convert it to PNG/PDF and replace this box.}}";
@@ -1530,15 +1495,36 @@ ${rights.join("\n")}
     }
     const caption = img.__caption || img.alt || "Figure caption";
     const widthSpec = !w || pt(w) >= 300 ? "width=\\linewidth" : "width=" + pt(w) + "pt";
-    const label = "fig:" + (img.dataset.latexName || "figure").replace(/\.[^.]+$/, "");
+    const label = uniqueLabel("fig:" + (img.dataset.latexName || "figure").replace(/\.[^.]+$/, ""));
     return "\n\\begin{figure}[" + floatPlacement() + "]\n\\centering\n\\includegraphics[" + widthSpec + "]{" + file + "}\n\\caption{" + texEscape(caption) + "}\n\\Description{" + texEscape(caption) + "}\n\\label{" + label + "}\n\\end{figure}\n";
   }
 
   function floatPlacement() { return state.floatMode === "here" ? "H" : "!htbp"; }
 
+  // One figures/word-figure-NN file per distinct image (the same picture pasted twice is stored once); sets data-latex-name on every <img>.
+  function imageManifest(root) {
+    const bySrc = new Map();
+    root.querySelectorAll("img").forEach((img) => {
+      const src = img.getAttribute("src") || "";
+      let name = bySrc.get(src);
+      if (!name) { name = "word-figure-" + String(bySrc.size + 1).padStart(2, "0") + imageExtension(src); bySrc.set(src, name); }
+      img.dataset.latexName = name;
+    });
+    return bySrc;
+  }
+
+  // \label{} values must be unique per document: two "(1)" tags or two copies of one image would otherwise collide.
+  function uniqueLabel(base) {
+    const used = state.usedLabels || (state.usedLabels = new Set());
+    let label = base, k = 2;
+    while (used.has(label)) label = base + "-" + k++;
+    used.add(label);
+    return label;
+  }
+
   // Expand rowspan/colspan into a full grid so merged cells map to \multirow / \multicolumn instead of shifting later rows left.
   function tableToLatex(table) {
-    const cellText = (cell) => { const clone = cell.cloneNode(true); clone.querySelectorAll(".footnote").forEach((n) => { n.replaceWith(" (" + n.textContent.trim() + ")"); }); clone.querySelectorAll("img").forEach((n) => n.remove()); return clone; };
+    const cellText = (cell) => { const clone = cell.cloneNode(true); clone.querySelectorAll(".footnote").forEach((n) => { n.replaceWith(" (" + n.textContent.trim() + ")"); }); clone.querySelectorAll("img").forEach((n) => n.classList.add("img-cell")); return clone; };
     const cellLatex = (cell) => nodeToLatex(cellText(cell)).replace(/\s+/g, " ").trim();
     const grid = [];
     [...table.rows].forEach((row, r) => {
@@ -1580,7 +1566,7 @@ ${rights.join("\n")}
     const caption = table.__caption || "Table caption";
     state.tableCounter = (state.tableCounter || 0) + 1;
     const colSpec = "|" + Array(cols).fill(">{\\raggedright\\arraybackslash}X").join("|") + "|";
-    const label = "tab:table" + state.tableCounter;
+    const label = uniqueLabel("tab:table" + state.tableCounter);
     if (grid.length > 18) {
       // long table: break across pages in place instead of blocking every float behind it
       return "\n\\begin{xltabular}{\\linewidth}{" + colSpec + "}\n\\caption{" + texEscape(caption) + "}\\label{" + label + "}\\\\\n\\hline\n" + lines.join("\n") + "\n\\end{xltabular}\n";
@@ -1620,6 +1606,7 @@ ${rights.join("\n")}
 
   async function downloadLatexProject() {
     if (!state.file) return;
+    flushContentEdit();
     const zip = new JSZip();
     try {
       const fixedZip = await loadFixedAssets();
@@ -1636,23 +1623,16 @@ ${rights.join("\n")}
     zip.file(mainDir + "build.bat", "@echo off\r\nlatexmk -xelatex -interaction=nonstopmode main.tex\r\npause\r\n");
     zip.file(mainDir + "build.sh", "#!/bin/sh\nlatexmk -xelatex -interaction=nonstopmode main.tex\n");
     const doc = document.createElement("div"); doc.innerHTML = state.bodyHtml;
-    [...doc.querySelectorAll("img")].forEach((img, i) => {
-      if (img.src.startsWith("data:")) zip.file(mainDir + "figures/word-figure-" + String(i + 1).padStart(2, "0") + imageExtension(img.src), dataUrlBase64(img.src), { base64: true });
-    });
+    // Same naming as buildLatex(): EMF/WMF originals are still shipped so the author can convert them and drop them into the placeholder.
+    imageManifest(doc).forEach((name, src) => { if (src.startsWith("data:")) zip.file(mainDir + "figures/" + name, dataUrlBase64(src), { base64: true }); });
     const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
     downloadBlob(blob, safeBaseName(state.file.name) + "-LaTeX-Project.zip");
     showToast("内置 ACM 模板 LaTeX 项目已生成");
   }
 
-  async function downloadStandaloneHtml() {
-    const css = await fetch("styles.css").then((r) => r.text());
-    const clone = els.paper.cloneNode(true);
-    clone.style.transform = "none"; clone.style.margin = "0 auto";
-    const html = "<!doctype html><html><head><meta charset=\"utf-8\"><title>" + escapeHtml(currentMeta().title) + "</title><style>" + css + "body{padding:24px;background:#dce5ec}.paper{transform:none!important;margin:0 auto!important}</style></head><body>" + clone.outerHTML + "</body></html>";
-    downloadText(safeBaseName(state.file.name) + "-formatted.html", html, "text/html;charset=utf-8");
-  }
 
   function prepareLocalPdf() {
+    flushContentEdit();
     document.title = safeBaseName((state.file && state.file.name) || "paper") + "-PDF";
     let style = $("dynamicPrintPage");
     if (!style) { style = document.createElement("style"); style.id = "dynamicPrintPage"; document.head.appendChild(style); }
@@ -1664,7 +1644,8 @@ ${rights.join("\n")}
     state.file = null; state.sourceHtml = ""; state.bodyHtml = ""; state.metadata = {}; state.authors = [blankAuthor()];
     els.fileInput.value = ""; els.fileCard.classList.add("hidden"); els.dropZone.classList.remove("hidden");
     [els.title, els.authors, els.affiliation, els.email, els.abstract, els.keywords, els.doi, els.ccs].forEach((input) => input.value = "");
-    state.equationsDropped = 0;
+    state.equationsDropped = 0; state.equations = []; state.charts = 0; state.oleObjects = 0; state.mathErrors = 0; state.citeStats = null;
+    state.renderedBodyHtml = ""; state.bodyStatsCache = null; state.headingMap = {};
     renderAuthorEditor();
     $("paperTitle").textContent = "Your Paper Title"; $("paperAbstract").textContent = "Upload a Word manuscript to generate an ACM formatted preview."; $("paperKeywords").textContent = "conference paper, intelligent typesetting";
     $("paperAuthors").innerHTML = "<div><b>Author Name</b><span>Institution</span><span>City, Country</span><span>author@example.com</span></div>";
@@ -1675,7 +1656,7 @@ ${rights.join("\n")}
 
   function schedulePagination() {
     clearTimeout(paginationTimer);
-    paginationTimer = setTimeout(paginatePreview, 20);
+    paginationTimer = setTimeout(paginatePreview, 120);
   }
 
   function removeCloneIds(root) {
@@ -1756,7 +1737,8 @@ ${rights.join("\n")}
   // citation linking sees "(Bian, 2024)" and pdfLaTeX does not choke on U+FF08.
   function fullwidthToAscii(text) { return String(text || "").replace(/[\uFF01-\uFF5E]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/\u3000/g, " "); }
   function texEscape(value) {
-    return fullwidthToAscii(value).replace(/\\/g, "\\textbackslash{}").replace(/([#$%&_{}])/g, "\\$1").replace(/\^/g, "\\textasciicircum{}").replace(/~/g, "\\textasciitilde{}").replace(TEX_SYMBOL_RE, (c) => TEX_SYMBOLS[c]);
+    // Backslashes are parked in a private-use sentinel first; otherwise the braces of \textbackslash{} would be escaped again by the next step.
+    return fullwidthToAscii(value).replace(/\\/g, "\uE003").replace(/([#$%&_{}])/g, "\\$1").replace(/\^/g, "\\textasciicircum{}").replace(/~/g, "\\textasciitilde{}").replace(/\uE003/g, "\\textbackslash{}").replace(TEX_SYMBOL_RE, (c) => TEX_SYMBOLS[c]);
   }
   function urlEscape(url) { return String(url || "").replace(/[{}]/g, "").replace(/\\/g, "/"); }
   // Body text: like texEscape, but bare URLs are wrapped in \url{} so they break across lines instead of overflowing the margin.

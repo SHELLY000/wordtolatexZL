@@ -40,10 +40,10 @@ const dom = new JSDOM(fs.readFileSync(HTML, "utf8"), {
     const toPage = (ab) => { const u = new window.Uint8Array(ab.byteLength); u.set(new Uint8Array(ab)); return u.buffer; };
     const wrap = (z) => { const g = z.generateAsync.bind(z); z.generateAsync = async (o) => { const r = await g(o); return o && o.type === "arraybuffer" ? toPage(r) : r; }; return z; };
     const Wrapped = function () { return wrap(new NodeZip()); };
-    Wrapped.loadAsync = async (data) => wrap(await NodeZip.loadAsync(toBuf(data)));
+    // The bundled acmart template is handed over as a base64 string ({ base64: true }); uploads arrive as ArrayBuffers.
+    Wrapped.loadAsync = async (data, options) => wrap(await NodeZip.loadAsync(typeof data === "string" ? data : toBuf(data), options));
     Object.defineProperty(window, "JSZip", { value: Wrapped, writable: false, configurable: false });
     window.TextDecoder = TextDecoder; window.TextEncoder = TextEncoder;
-    window.fetch = async (...a) => { const r = await globalThis.fetch(...a); return { ok: r.ok, status: r.status, text: () => r.text(), json: () => r.json(), arrayBuffer: async () => toPage(await r.arrayBuffer()) }; };
     window.print = () => {};
     window.HTMLElement.prototype.scrollIntoView = () => {};
     window.Image = class { constructor() { this.naturalWidth = 0; this.naturalHeight = 0; } set src(v) { this._src = v; const s = pngSize(v); this.naturalWidth = s.w; this.naturalHeight = s.h; setTimeout(() => this.onload && this.onload(), 0); } get src() { return this._src; } };

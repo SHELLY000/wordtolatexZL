@@ -1,5 +1,46 @@
 # Changelog
 
+## 0.2.1 — 2026-09-09
+
+Code review of the 0.2.0 bundle. Every item below is covered by `tests/regressions.test.js` (a synthetic
+manuscript written as raw WordprocessingML) or by new cases in `tests/omml2latex.test.js`.
+
+### Fixed
+- `texEscape` escaped its own `\textbackslash{}`: any backslash in body text (`C:\path\file`) came out as
+  `\textbackslash\{\}`. Backslashes are now parked in a sentinel until the brace pass is done.
+- `linkCitations` rewrote `[n]` inside math: `\sqrt[3]{x}` became `\sqrt\cite{ref3}{x}`. Citation linking
+  now skips `$…$`, `\[…\]`, `equation`/`align`/`gather`/`multline` environments and the arguments of `\url`,
+  `\href`, `\includegraphics`, `\label`, `\ref` and `\cite`.
+- Plain Word text runs (`<w:r>`) inside an OMML formula were dropped into `\text{}` verbatim, so `_`, `%`, `&`,
+  `{}` broke the compile; "normal text" runs used math-only commands (`\backslash`, `\hat{}`) inside `\text{}`.
+  Both now use text-mode escapes.
+- A numbered equation whose "(1)" Word had split into several runs (`(`, `1`, `)`, a tab or a SEQ field) kept
+  the literal number next to `\tag{1}`, so the preview showed "(1) (1)". All plain runs outside the math are
+  now removed (runs that are not plain text, e.g. footnote references, are kept).
+- Images inside table cells were deleted silently. They are kept as `\includegraphics[width=\linewidth,
+  height=…,keepaspectratio]` (no float inside `tabularx`), listed in the checklist, and shown in the preview.
+- Duplicate `\label{}`s: two equations tagged "(1)" or the same picture used twice produced multiply-defined
+  labels; labels are now made unique per export. The same picture used several times is stored once in the ZIP.
+- `resetWord` did not clear `charts`, `oleObjects`, `citeStats` and `equations`, so the checklist could show the
+  previous manuscript's numbers after "remove file"; `state.floatMode` is now initialised.
+- URLs in the abstract are wrapped in `\url{}` like URLs in the body.
+
+### Changed
+- The bundled acmart template is decoded with `JSZip.loadAsync(base64, { base64: true })` instead of
+  `fetch("data:…")`, which fails under a strict Content-Security-Policy and in some `file://` contexts (and
+  needed a `fetch` stub in the headless runner, now removed).
+- Performance while proofreading: edits in the review panel are batched (200 ms) and flushed before step
+  changes and exports; metadata keystrokes no longer re-render and re-typeset the whole body; KaTeX output is
+  memoised per formula; the whole-body scans behind the checklist are cached per body; pagination is
+  debounced at 120 ms instead of 20 ms.
+- Failed KaTeX renders keep the LaTeX source visible in the preview (previously the span was emptied).
+
+### Removed
+- Dead code: `countWordEquations`, `downloadStandaloneHtml` (fetched a non-existent `styles.css`),
+  `detectTemplateType`, `replaceAuthorArea`, `replaceDocumentBody`, `replaceLatexEnvironment`,
+  `replaceLatexCommand`, `removeLatexCommand`, `countFollowingParagraphs`, the unused `flag` helper and a
+  duplicate `¬` symbol entry.
+
 ## 0.2.0 — 2026-09-06
 
 Driven by a regression run over seven real manuscripts (see `validation_results/`). All seven now compile
