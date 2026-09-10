@@ -7,12 +7,12 @@ const cell = (t, o = {}) => new TableCell({ children: [new Paragraph(t)], width:
 const doc = new Document({
   sections: [{
     children: [
-      new Paragraph({ text: "A Sample Manuscript for WordTeX", heading: HeadingLevel.TITLE }),
+      new Paragraph({ text: "A Sample Manuscript for GalleyTeX", heading: HeadingLevel.TITLE }),
       new Paragraph("Alice Author* (Corresponding author)"),
       new Paragraph("School of Economics, Example University, Wuhan, China, alice@example.edu.cn"),
       new Paragraph("Bob Writer"),
       new Paragraph("Department of Computing, Sample Institute of Technology, Atlanta, USA, bob@example.edu"),
-      new Paragraph({ children: [new TextRun({ text: "Abstract: ", bold: true }), new TextRun("This short document exercises the WordTeX pipeline: built-in heading styles, an equation, a table with merged cells, a figure with a caption, numeric citations and a reference list.")] }),
+      new Paragraph({ children: [new TextRun({ text: "Abstract: ", bold: true }), new TextRun("This short document exercises the GalleyTeX pipeline: built-in heading styles, an equation, a table with merged cells, a figure with a caption, numeric citations and a reference list.")] }),
       new Paragraph({ children: [new TextRun({ text: "Keywords: ", bold: true }), new TextRun("Word to LaTeX; typesetting; regression test")] }),
       new Paragraph({ text: "1 Introduction", heading: HeadingLevel.HEADING_1 }),
       new Paragraph("Converting Word manuscripts to LaTeX is tedious [1]. This document is a fixture for the regression tests [2, 3]. The model is given in Equation (1)."),

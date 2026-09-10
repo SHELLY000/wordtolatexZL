@@ -1,11 +1,11 @@
 /*
- * i18n.js — interface strings for WordTeX Studio.
+ * i18n.js — interface strings for GalleyTeX Studio.
  *
  * English is the default; Simplified Chinese can be selected with the switch in the page header and the
- * choice is remembered in localStorage ("wordtex-lang"). Static markup is translated through data-i18n,
+ * choice is remembered in localStorage ("galleytex-lang"). Static markup is translated through data-i18n,
  * data-i18n-placeholder, data-i18n-title and data-i18n-aria attributes; dynamic strings go through t().
  *
- *   const { t, apply, setLanguage, language } = WordTeXI18N;
+ *   const { t, apply, setLanguage, language } = GalleyTeXI18N;
  *   t("toast.recognised")                       -> "Word document recognised"
  *   t("checks.equations.ok", { n: 3 })          -> "3 Word equations converted to LaTeX"
  *
@@ -14,19 +14,19 @@
  */
 (function (root, factory) {
   if (typeof module === "object" && module.exports) module.exports = factory();
-  else root.WordTeXI18N = factory();
+  else root.GalleyTeXI18N = factory();
 })(typeof self !== "undefined" ? self : this, function () {
   "use strict";
 
-  const STORAGE_KEY = "wordtex-lang";
+  const STORAGE_KEY = "galleytex-lang";
   const DEFAULT = "en";
 
   const DICT = {
     en: {
       "html.lang": "en",
-      "app.title": "WordTeX — Word to LaTeX manuscript typesetting",
+      "app.title": "GalleyTeX — Word to LaTeX manuscript typesetting",
       "app.description": "Upload a Word manuscript and convert it locally to LaTeX (equations, tables, figures, citations) in the ACM acmart template, with a paginated preview and block-by-block proofreading.",
-      "header.brand": "WordTeX",
+      "header.brand": "GalleyTeX",
       "header.tagline": "Word → ACM LaTeX + PDF",
       "header.privacy": "Processed locally — nothing is uploaded",
       "header.language": "Interface language",
@@ -256,9 +256,9 @@
 
     zh: {
       "html.lang": "zh-CN",
-      "app.title": "WordTeX 论文智能排版工具",
+      "app.title": "GalleyTeX 论文智能排版工具",
       "app.description": "上传 Word 论文，在本机转换为 LaTeX（含公式、表格、图片、引用），生成 ACM acmart 项目和排版预览，作者可逐块校对。",
-      "header.brand": "WordTeX",
+      "header.brand": "GalleyTeX",
       "header.tagline": "WORD → ACM LATEX + PDF",
       "header.privacy": "文档仅在本机处理",
       "header.language": "界面语言",

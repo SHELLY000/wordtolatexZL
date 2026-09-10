@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * Assemble the single-file offline app (wordtex_studio.html) from src/, vendor/ and templates/.
+ * Assemble the single-file offline app (galleytex_studio.html) from src/, vendor/ and templates/.
  * Usage: node scripts/build.js [outfile]
  */
 const fs = require("fs");
@@ -8,7 +8,7 @@ const path = require("path");
 
 const root = path.resolve(__dirname, "..");
 const read = (p) => fs.readFileSync(path.join(root, p), "utf8");
-const out = process.argv[2] || path.join(root, "wordtex_studio.html");
+const out = process.argv[2] || path.join(root, "galleytex_studio.html");
 
 const template = read("src/index.template.html");
 const templateZipB64 = fs.readFileSync(path.join(root, "templates/acmart-template.zip")).toString("base64");

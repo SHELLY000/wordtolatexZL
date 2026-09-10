@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * Run wordtex_studio.html without a browser (jsdom) on one .docx and capture what the app produced.
+ * Run galleytex_studio.html without a browser (jsdom) on one .docx and capture what the app produced.
  *
  *   node scripts/headless_run.js <app.html> <manuscript.docx> <outdir> [--conference "Name" --short "SHORT" --year 2025] [--lang en|zh]
  *
@@ -19,7 +19,7 @@ const path = require("path");
 const args = process.argv.slice(2);
 const positional = args.filter((a, i) => !a.startsWith("--") && !(args[i - 1] || "").startsWith("--"));
 const opt = (name, dflt) => { const i = args.indexOf("--" + name); return i >= 0 ? args[i + 1] : dflt; };
-const HTML = positional[0] || path.join(__dirname, "..", "wordtex_studio.html");
+const HTML = positional[0] || path.join(__dirname, "..", "galleytex_studio.html");
 const DOCX = positional[1] || path.join(__dirname, "..", "examples", "sample_manuscript.docx");
 const OUT = positional[2] || "./headless_out";
 const LANG = opt("lang", "en");           // interface language of the captured report (checklist, block labels)
@@ -49,7 +49,7 @@ const dom = new JSDOM(fs.readFileSync(HTML, "utf8"), {
     window.HTMLElement.prototype.scrollIntoView = () => {};
     window.Image = class { constructor() { this.naturalWidth = 0; this.naturalHeight = 0; } set src(v) { this._src = v; const s = pngSize(v); this.naturalWidth = s.w; this.naturalHeight = s.h; setTimeout(() => this.onload && this.onload(), 0); } get src() { return this._src; } };
     window.URL.createObjectURL = (blob) => { captured.push(blob); return "blob:captured"; };
-    try { window.localStorage.setItem("wordtex-lang", LANG); } catch (_) { /* storage unavailable */ }
+    try { window.localStorage.setItem("galleytex-lang", LANG); } catch (_) { /* storage unavailable */ }
     window.URL.revokeObjectURL = () => {};
   },
 });

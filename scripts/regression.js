@@ -2,7 +2,7 @@
 /*
  * Regression run over a set of manuscripts.
  *
- *   node scripts/regression.js [dir-or-files...] [--compile] [--app wordtex_studio.html] [--out regression_out]
+ *   node scripts/regression.js [dir-or-files...] [--compile] [--app galleytex_studio.html] [--out regression_out]
  *
  * For every .docx: run the app headlessly, unzip the exported project, count what main.tex contains, and (with --compile,
  * when latexmk/xelatex are installed) compile it and report errors and pages. Prints one CSV line per manuscript, which is
@@ -16,7 +16,7 @@ const NodeZip = require("jszip");
 const args = process.argv.slice(2);
 const flag = (n) => args.includes("--" + n);
 const opt = (n, d) => { const i = args.indexOf("--" + n); return i >= 0 ? args[i + 1] : d; };
-const APP = path.resolve(opt("app", path.join(__dirname, "..", "wordtex_studio.html")));
+const APP = path.resolve(opt("app", path.join(__dirname, "..", "galleytex_studio.html")));
 const OUT = path.resolve(opt("out", "regression_out"));
 const inputs = args.filter((a, i) => !a.startsWith("--") && !["app", "out"].includes((args[i - 1] || "").replace(/^--/, "")));
 const targets = (inputs.length ? inputs : [path.join(__dirname, "..", "tests", "fixtures")]).flatMap((t) => fs.statSync(t).isDirectory() ? fs.readdirSync(t).filter((f) => /\.docx$/i.test(f)).map((f) => path.join(t, f)) : [t]);

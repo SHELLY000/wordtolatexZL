@@ -1,6 +1,6 @@
 # Architecture
 
-WordTeX is a single-page application (no server) plus a Node harness that drives the same page without a browser.
+GalleyTeX is a single-page application (no server) plus a Node harness that drives the same page without a browser.
 
 ## Pipeline
 

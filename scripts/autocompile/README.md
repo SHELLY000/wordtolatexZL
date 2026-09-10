@@ -5,11 +5,11 @@
 
 | 平台 | 文件 | 用法 |
 |---|---|---|
-| Windows | `WordTeX-autocompile.bat` + `wordtex-autocompile.ps1` | 两个文件放在同一文件夹，双击 .bat；首次确认监视目录（默认"下载"），以后记住。把 ZIP 或文件夹拖到 .bat 上也可以。 |
-| macOS / Linux | `wordtex-autocompile.sh` | `./wordtex-autocompile.sh`（默认监视 ~/Downloads）或 `./wordtex-autocompile.sh paper-LaTeX-Project.zip` |
+| Windows | `GalleyTeX-autocompile.bat` + `galleytex-autocompile.ps1` | 两个文件放在同一文件夹，双击 .bat；首次确认监视目录（默认"下载"），以后记住。把 ZIP 或文件夹拖到 .bat 上也可以。 |
+| macOS / Linux | `galleytex-autocompile.sh` | `./galleytex-autocompile.sh`（默认监视 ~/Downloads）或 `./galleytex-autocompile.sh paper-LaTeX-Project.zip` |
 
 需要本机装有 TeX Live / MiKTeX / MacTeX，并且包含 `xelatex`（有 `latexmk` 更好）。导出的项目是为 XeLaTeX 写的：中文和
 Unicode 符号只有 XeLaTeX 能编译；脚本在只找到 pdflatex 时会给出警告。
 
-编译在纯 ASCII 路径下进行（Windows：`C:\Users\Public\wordtex-build\<时间>-<论文名>\`；macOS/Linux：`$TMPDIR/wordtex-build/`），
+编译在纯 ASCII 路径下进行（Windows：`C:\Users\Public\galleytex-build\<时间>-<论文名>\`；macOS/Linux：`$TMPDIR/galleytex-build/`），
 里面的 `main.tex` 可以直接用 TeXstudio 打开继续修改。

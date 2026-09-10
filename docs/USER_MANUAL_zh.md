@@ -1,8 +1,8 @@
-# WordTeX 用户手册（中文）
+# GalleyTeX 用户手册（中文）
 
 **版本 0.2.2** · Word (.docx) → LaTeX 论文排版，作者逐块校对
 
-本手册翻译并整理了英文完整手册 `WordTeX_USER_MANUAL.md` 中面向**作者和编辑部**的部分：系统要求、安装、操作指南、常见问题、检查清单说明。面向开发者的内容（功能模块、API 参考、验证数据、仓库结构、转义规则）请看英文手册第 4、5、8 节和附录 A、C、D、F。
+本手册翻译并整理了英文完整手册 `GalleyTeX_USER_MANUAL.md` 中面向**作者和编辑部**的部分：系统要求、安装、操作指南、常见问题、检查清单说明。面向开发者的内容（功能模块、API 参考、验证数据、仓库结构、转义规则）请看英文手册第 4、5、8 节和附录 A、C、D、F。
 
 界面默认为英文；点页面右上角的 **EN / 中文** 切换为简体中文，切换不会丢失已上传的论文和未保存的修改，选择会记在浏览器里。下文按**中文界面**的按钮和提示描述。
 
@@ -27,14 +27,14 @@
 
 ### 1.1 它解决什么问题
 
-WordTeX 把一篇 Word 论文转换成**能直接编译**的 LaTeX 项目，并让不会 LaTeX 的作者自己检查和修正转换结果。它面对的是很多小型会议和新创期刊的处境：
+GalleyTeX 把一篇 Word 论文转换成**能直接编译**的 LaTeX 项目，并让不会 LaTeX 的作者自己检查和修正转换结果。它面对的是很多小型会议和新创期刊的处境：
 
 - **作者用 Word 写稿**，不会 LaTeX；
 - **出版流程跑在 LaTeX 上**，主办方模板（这里是 ACM `acmart`）只有 `.cls` 文件。
 
 编辑部夹在中间，要么重新录入，要么跑一遍转换器再手工修补。现有转换器（Pandoc、Writer2LaTeX、商业插件）停在一个 `.tex` 文件上：不面向任何模板，不告诉作者丢了什么，也不给不会 LaTeX 的作者任何可以修改的东西。
 
-WordTeX 把这个环闭上。转换全部在浏览器里完成；识别出的每一个块——标题、段落、**可编辑的公式 LaTeX**、表格、图片、参考文献——都列在模板预览旁边；作者用普通的文字编辑和一个"块类型"下拉菜单修正转换错误；检查清单指出还需要注意的地方；导出的项目**一定能编译**，因为 WordTeX 转不了的内容（旧式公式编辑器对象、Word 原生图表、WMF 图片）会变成原位置上一个可见的占位框，而不是编译错误。
+GalleyTeX 把这个环闭上。转换全部在浏览器里完成；识别出的每一个块——标题、段落、**可编辑的公式 LaTeX**、表格、图片、参考文献——都列在模板预览旁边；作者用普通的文字编辑和一个"块类型"下拉菜单修正转换错误；检查清单指出还需要注意的地方；导出的项目**一定能编译**，因为 GalleyTeX 转不了的内容（旧式公式编辑器对象、Word 原生图表、WMF 图片）会变成原位置上一个可见的占位框，而不是编译错误。
 
 ### 1.2 主要功能
 
@@ -47,7 +47,7 @@ WordTeX 把这个环闭上。转换全部在浏览器里完成；识别出的每
 - **文内引用关联**：`[3]`、`[2, 5]`、`[4–6]` 和 `(Author et al., 2024)` 匹配到参考文献后变成 `\cite{refN}`；参考文献列表输出为 `thebibliography`。
 - **一定能编译**：WMF/EMF 图片、公式编辑器 3.0 / MathType 对象、原生图表变成占位框；`xeCJK` 仅在已安装时加载；缺少国家时从邮箱域名推断；过长的字段会截断。
 - **会议资料只填一次**：会议名称、日期、ISBN、`\setcopyright`、模板变体填一次后记在浏览器里，也可导出/导入为 JSON。
-- **零安装**：`wordtex_studio.html` 一个 1.6 MB 的文件，离线运行，无服务器、无上传、无网络访问。
+- **零安装**：`galleytex_studio.html` 一个 1.6 MB 的文件，离线运行，无服务器、无上传、无网络访问。
 - **中英双语界面**。
 - **无浏览器批处理**：同一页面可由 Node/jsdom 驱动，供编辑部平台、批量转换和持续集成使用。
 
@@ -75,7 +75,7 @@ WordTeX 把这个环闭上。转换全部在浏览器里完成；识别出的每
 | 项目 | 要求 |
 |---|---|
 | TeX 发行版 | TeX Live 2022+（建议完整安装）、MiKTeX 或 MacTeX |
-| 引擎 | **XeLaTeX**——`pdflatex` 会在 WordTeX 原样保留的 Unicode 符号上报错；项目自带的 `latexmkrc` 已自动选择 XeLaTeX |
+| 引擎 | **XeLaTeX**——`pdflatex` 会在 GalleyTeX 原样保留的 Unicode 符号上报错；项目自带的 `latexmkrc` 已自动选择 XeLaTeX |
 | 宏包 | `acmart` 及其依赖（libertine、newtxmath 等）、`tabularx`、`multirow`、`xltabular`、`placeins`、`float` |
 | 中文 | `xeCJK` 加 *Noto Serif CJK SC*、*SimSun*、*Songti SC* 之一；仅在存在时加载 |
 
@@ -93,7 +93,7 @@ Node.js 18 以上（推荐 22），Linux / macOS / Windows 均可。`npm ci` 会
 
 ### 3.1 浏览器工具
 
-不需要安装。从 GitHub 最新 Release 下载 `wordtex_studio.html`，双击打开，或在浏览器"文件"菜单里打开。
+不需要安装。从 GitHub 最新 Release 下载 `galleytex_studio.html`，双击打开，或在浏览器"文件"菜单里打开。
 
 ### 3.2 从源码构建
 
@@ -101,7 +101,7 @@ Node.js 18 以上（推荐 22），Linux / macOS / Windows 均可。`npm ci` 会
 git clone https://github.com/SHELLY000/wordtolatexZL
 cd wordtolatexZL
 npm ci
-npm run build          # -> wordtex_studio.html
+npm run build          # -> galleytex_studio.html
 ```
 
 `npm run build` 把 `src/`、`vendor/`、`templates/` 拼装成单文件应用，同样的输入产生逐字节相同的结果。
@@ -112,7 +112,7 @@ npm run build          # -> wordtex_studio.html
 npm test
 # 35 个测试：OMML 单元测试、界面文案测试、示例稿的流水线测试、回归测试
 
-node scripts/headless_run.js wordtex_studio.html examples/sample_manuscript.docx out/
+node scripts/headless_run.js galleytex_studio.html examples/sample_manuscript.docx out/
 # 产生 out/ui_report.json  out/preview.html  out/project.zip
 ```
 
@@ -124,8 +124,8 @@ node scripts/headless_run.js wordtex_studio.html examples/sample_manuscript.docx
 
 | 平台 | 文件 | 用法 |
 |---|---|---|
-| Windows | `WordTeX-autocompile.bat` + `wordtex-autocompile.ps1` | 两个文件放在同一目录，双击 `.bat`；第一次确认要监视的文件夹（默认"下载"）。也可以把 ZIP 或文件夹拖到 `.bat` 上。 |
-| macOS / Linux | `wordtex-autocompile.sh` | `./wordtex-autocompile.sh`（监视 `~/Downloads`）或 `./wordtex-autocompile.sh 论文-LaTeX-Project.zip` |
+| Windows | `GalleyTeX-autocompile.bat` + `galleytex-autocompile.ps1` | 两个文件放在同一目录，双击 `.bat`；第一次确认要监视的文件夹（默认"下载"）。也可以把 ZIP 或文件夹拖到 `.bat` 上。 |
+| macOS / Linux | `galleytex-autocompile.sh` | `./galleytex-autocompile.sh`（监视 `~/Downloads`）或 `./galleytex-autocompile.sh 论文-LaTeX-Project.zip` |
 
 脚本把 ZIP 解压到纯 ASCII 路径的编译目录，运行 `latexmk -xelatex`，打开 PDF；失败时显示前几行错误并把完整日志存到 ZIP 旁边。需要本机有带 `xelatex`（最好也有 `latexmk`）的 TeX 发行版——TeXstudio 只是编辑器，它背后的 TeX Live / MiKTeX 才是编译器。
 
@@ -222,7 +222,7 @@ node scripts/regression.js submissions/ --compile --out build/ | tee submissions
 |---|---|---|
 | 会议资料 | `localStorage` 键 `ei-typesetter-conference-v1` | 直到清除；也可导出为 JSON |
 | 已选 CCS 概念 | `localStorage` 键 `ei-typesetter-ccs-v1` | 直到清除 |
-| 界面语言 | `localStorage` 键 `wordtex-lang` | 直到清除；没有时为英文 |
+| 界面语言 | `localStorage` 键 `galleytex-lang` | 直到清除；没有时为英文 |
 | 论文、修改、图片 | 仅页面内存 | **刷新即丢失——关闭前请先导出** |
 
 ### 5.3 与无浏览器运行的一致性
@@ -383,8 +383,8 @@ node scripts/regression.js submissions/ --compile --out build/ | tee submissions
 
 引用本软件请同时引用软件本身和配套的 SoftwareX 论文（发表后）；机器可读的引用信息在 `CITATION.cff`。
 
-持续集成在 Ubuntu、Windows、macOS 上以 Node 18、20、22 运行全部测试，构建 `wordtex_studio.html`，并用 XeLaTeX 编译示例项目，任何 LaTeX 错误都会使构建失败。
+持续集成在 Ubuntu、Windows、macOS 上以 Node 18、20、22 运行全部测试，构建 `galleytex_studio.html`，并用 XeLaTeX 编译示例项目，任何 LaTeX 错误都会使构建失败。
 
 ---
 
-*WordTeX 0.2.2 · MIT License · Copyright © 2026 Li Zhou*
+*GalleyTeX 0.2.2 · MIT License · Copyright © 2026 Li Zhou*

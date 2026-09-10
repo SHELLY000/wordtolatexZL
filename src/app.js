@@ -93,7 +93,7 @@
   const URL_RE = /((?:https?:\/\/|www\.)[^\s<>"'（）()]+)/g;
 
   const $ = (id) => document.getElementById(id);
-  const I18N = WordTeXI18N, t = I18N.t;
+  const I18N = GalleyTeXI18N, t = I18N.t;
   I18N.setLanguage(I18N.detect());
   I18N.apply(document);
   const state = { step: "import", file: null, templateFile: { name: "built-in acmart template" }, templateText: "", templateZip: null, templateEntries: [], templateMainPath: "main.tex", templateType: "acm", layoutMode: "single", fixedAssetsPromise: null, conference: {}, sourceHtml: "", bodyHtml: "", renderedBodyHtml: "", bodyStatsCache: null, zoom: 82, metadata: {}, authors: [], equations: [], charts: 0, oleObjects: 0, equationsDropped: 0, mathErrors: 0, citeStats: null, floatMode: "auto" };

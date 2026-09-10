@@ -8,14 +8,14 @@ const { execFileSync } = require("child_process");
 const NodeZip = require("jszip");
 
 const root = path.join(__dirname, "..");
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "wordtex-"));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "galleytex-"));
 const app = path.join(tmp, "app.html");
 
 test("pipeline: build + headless conversion of the example manuscript", async () => {
   execFileSync(process.execPath, [path.join(root, "scripts", "build.js"), app], { stdio: "inherit" });
   execFileSync(process.execPath, [path.join(root, "scripts", "headless_run.js"), app, path.join(root, "examples", "sample_manuscript.docx"), tmp], { stdio: "inherit", timeout: 240000 });
   const report = JSON.parse(fs.readFileSync(path.join(tmp, "ui_report.json"), "utf8"));
-  assert.equal(report.title, "A Sample Manuscript for WordTeX");
+  assert.equal(report.title, "A Sample Manuscript for GalleyTeX");
   assert.equal(report.authors.length, 2);
   assert.equal(report.authors[0].name, "Alice Author");
   assert.equal(report.authors[0].corresponding, true);
