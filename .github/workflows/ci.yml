@@ -27,7 +27,7 @@ jobs:
         run: npm test
 
   build-artifact:
-    name: Build wordtex_studio.html
+    name: Build galleytex_studio.html
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,8 +39,8 @@ jobs:
       - run: npm run build
       - uses: actions/upload-artifact@v4
         with:
-          name: wordtex_studio
-          path: wordtex_studio.html
+          name: galleytex_studio
+          path: galleytex_studio.html
 
   compile-example:
     name: Compile the example with XeLaTeX
