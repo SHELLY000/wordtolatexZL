@@ -48,7 +48,7 @@ XeLaTeX (TeX Live) is only needed to compile the exported projects.
 
 ## Quick start
 
-The full manual is `WordTeX_USER_MANUAL.md`. The interface is English by default; the **EN / 中文** switch
+The full manual is `WordTeX_USER_MANUAL.md`; a Chinese manual covering the author- and editor-facing sections is `docs/USER_MANUAL_zh.md`. The interface is English by default; the **EN / 中文** switch
 in the header changes it to Simplified Chinese.
 
 1. Open `wordtex_studio.html`, fill in the conference/journal details once (they are remembered).

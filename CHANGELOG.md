@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- `docs/USER_MANUAL_zh.md`: Chinese user manual covering the author- and editor-facing sections of the English manual (requirements, installation, operation guide, troubleshooting, checklist glossary); replaces the former Chinese quick reference `docs/USER_MANUAL.md`.
+- CI installs `texlive-fonts-recommended` and `fonts-linuxlibertine` so the XeLaTeX example compile runs with acmart's real fonts; the compile job prints LaTeX errors as annotations and uploads `main.log`.
+
+### Changed
+- `npm test` runs `node --test` without a shell glob, so it works on Windows with Node 18 and 20.
+- `CITATION.cff` and the README badge carry the Zenodo DOI 10.5281/zenodo.22692708.
+
 ## 0.2.2 — 2026-09-09
 
 ### Added

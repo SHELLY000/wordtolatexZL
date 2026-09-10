@@ -2,7 +2,7 @@
 
 ## 给作者和编辑（不用装任何东西）
 
-双击打开 `wordtex_studio.html`（约 1.6 MB，离线运行，文件不会上传到任何地方）。界面默认为英文，点右上角的 **EN / 中文** 可切换为中文（会记住选择）。完整英文手册见 `WordTeX_USER_MANUAL.md`。
+双击打开 `wordtex_studio.html`（约 1.6 MB，离线运行，文件不会上传到任何地方）。界面默认为英文，点右上角的 **EN / 中文** 可切换为中文（会记住选择）。中文手册见 `docs/USER_MANUAL_zh.md`，完整英文手册见 `WordTeX_USER_MANUAL.md`。
 
 1. 第一次使用先填会议/期刊资料（名称、年份、ISBN、模板格式），点"立即保存"，以后自动沿用。
 2. 上传 Word 稿件（.docx）。左侧会列出识别到的标题、作者、摘要、关键词和正文的每一个块；右侧是套好模板的预览。
@@ -37,7 +37,7 @@ node scripts/regression.js manuscripts/ --compile                    # 批量回
 | `tests/` | 单元测试和端到端测试；`tests/fixtures/` 放本地回归稿件（不入库） |
 | `examples/` | 合成的示例稿件 `sample_manuscript.docx` 及其生成脚本 |
 | `validation_results/` | 七篇真实稿件改进前后的统计 |
-| `docs/` | 中文速查手册、架构说明；根目录 `WordTeX_USER_MANUAL.md` 为完整英文手册 |
+| `docs/` | `USER_MANUAL_zh.md` 中文手册（安装、操作、常见问题、检查清单）、`ARCHITECTURE.md` 架构说明；根目录 `WordTeX_USER_MANUAL.md` 为完整英文手册（含模块、API、验证） |
 
 ## 发布前请改的地方
 
