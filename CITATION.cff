@@ -12,12 +12,12 @@ abstract: >-
   authors who do not know LaTeX proofread and correct every recognised block,
   including equations, before the project is handed to the editorial office.
 type: software
-version: "0.2.2"
-date-released: "2026-09-09"
+version: "0.3.1"
+date-released: "2026-09-11"
 license: MIT
 repository-code: "https://github.com/SHELLY000/wordtolatexZL"
 url: "https://github.com/SHELLY000/wordtolatexZL"
-doi: "10.5281/zenodo.22692708"
+doi: "10.5281/zenodo.22693723"
 keywords:
   - Word to LaTeX
   - document conversion
