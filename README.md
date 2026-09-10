@@ -5,7 +5,7 @@ journals and conferences whose authors write in Word and whose production runs o
 
 [![CI](https://github.com/SHELLY000/wordtolatexZL/actions/workflows/ci.yml/badge.svg)](https://github.com/SHELLY000/wordtolatexZL/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22693723.svg)](https://doi.org/10.5281/zenodo.22693723)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22694058.svg)](https://doi.org/10.5281/zenodo.22694058)
 
 ## Why
 
