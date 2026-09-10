@@ -17,7 +17,7 @@ date-released: "2026-09-09"
 license: MIT
 repository-code: "https://github.com/SHELLY000/wordtolatexZL"
 url: "https://github.com/SHELLY000/wordtolatexZL"
-# doi: "10.5281/zenodo.XXXXXXX"          # add after the first Zenodo release
+doi: "10.5281/zenodo.22692708"
 keywords:
   - Word to LaTeX
   - document conversion
