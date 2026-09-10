@@ -1,4 +1,4 @@
-# WordTeX
+# GalleyTeX
 
 Word (.docx) → LaTeX manuscript typesetting with author-in-the-loop proofreading, for
 journals and conferences whose authors write in Word and whose production runs on LaTeX.
@@ -15,7 +15,7 @@ run a converter and hand-fix its output. Existing converters (Pandoc, Writer2LaT
 commercial add-ins) stop at a `.tex` file: they do not target a journal template, do not
 tell the author what was lost, and give a non-LaTeX author nothing they can correct.
 
-WordTeX closes that loop. It converts the manuscript in the browser, shows the author every
+GalleyTeX closes that loop. It converts the manuscript in the browser, shows the author every
 recognised block — headings, paragraphs, **equations as editable LaTeX**, tables, figures,
 references — next to a template-formatted preview, lets them fix what the converter got wrong
 without knowing LaTeX, and exports a project that **always compiles**: content it cannot
@@ -26,21 +26,21 @@ visible placeholder at the right position instead of a build error.
 
 | | For | How |
 |---|---|---|
-| **`wordtex_studio.html`** | Authors and editors, no install | Open the file in a browser. Everything runs locally; nothing is uploaded. |
-| **`scripts/headless_run.js`** | Editorial platforms, batch runs, CI | `node scripts/headless_run.js wordtex_studio.html paper.docx out/` — same code path, no browser. |
+| **`galleytex_studio.html`** | Authors and editors, no install | Open the file in a browser. Everything runs locally; nothing is uploaded. |
+| **`scripts/headless_run.js`** | Editorial platforms, batch runs, CI | `node scripts/headless_run.js galleytex_studio.html paper.docx out/` — same code path, no browser. |
 
 The single HTML file is built from `src/`, `vendor/` and `templates/` (`npm run build`); it
 bundles mammoth.js, JSZip, KaTeX and the ACM `acmart` template (see `vendor/LICENSES.md`).
 
 ## Install
 
-Nothing to install for the web app: download `wordtex_studio.html` from the latest release
+Nothing to install for the web app: download `galleytex_studio.html` from the latest release
 and open it. For the headless runner, tests and builds:
 
 ```bash
 git clone https://github.com/SHELLY000/wordtolatexZL
 cd wordtolatexZL && npm ci
-npm run build        # -> wordtex_studio.html
+npm run build        # -> galleytex_studio.html
 npm test             # 35 unit, interface-string, pipeline and regression tests (needs Node 18+)
 ```
 
@@ -48,10 +48,10 @@ XeLaTeX (TeX Live) is only needed to compile the exported projects.
 
 ## Quick start
 
-The full manual is `WordTeX_USER_MANUAL.md`; a Chinese manual covering the author- and editor-facing sections is `docs/USER_MANUAL_zh.md`. The interface is English by default; the **EN / 中文** switch
+The full manual is `GalleyTeX_USER_MANUAL.md`; a Chinese manual covering the author- and editor-facing sections is `docs/USER_MANUAL_zh.md`. The interface is English by default; the **EN / 中文** switch
 in the header changes it to Simplified Chinese.
 
-1. Open `wordtex_studio.html`, fill in the conference/journal details once (they are remembered).
+1. Open `galleytex_studio.html`, fill in the conference/journal details once (they are remembered).
 2. Upload the `.docx`. The left panel lists the recognised title, authors, abstract, keywords
    and every body block with its type; the right panel shows the template preview.
 3. Correct anything that is wrong: edit text or LaTeX in a block, change a block's type with
@@ -70,7 +70,7 @@ Requires TeX Live / MiKTeX / MacTeX with `xelatex`.
 Headless:
 
 ```bash
-node scripts/headless_run.js wordtex_studio.html examples/sample_manuscript.docx out/
+node scripts/headless_run.js galleytex_studio.html examples/sample_manuscript.docx out/
 #   out/ui_report.json  recognised metadata, checklist, block labels
 #   out/project.zip     the LaTeX project
 node scripts/regression.js my_manuscripts/ --compile      # one CSV line per manuscript
@@ -118,7 +118,7 @@ see `validation_results/`.
 | In-text citations linked | 0 | 94 |
 
 The 39 equations of the first manuscript agree with Pandoc's conversion in 29 cases after
-normalisation; the remaining 10 are runs the author set upright in Word, which WordTeX keeps
+normalisation; the remaining 10 are runs the author set upright in Word, which GalleyTeX keeps
 as `\mathrm{}` and Pandoc ignores.
 
 ## Limitations
@@ -134,7 +134,7 @@ as `\mathrm{}` and Pandoc ignores.
 
 ## Cite
 
-See `CITATION.cff`. If you use WordTeX in a paper, please cite the software and the SoftwareX
+See `CITATION.cff`. If you use GalleyTeX in a paper, please cite the software and the SoftwareX
 article once it is published.
 
 **Contact.** Li Zhou (corresponding author), School of Economics, Wuhan Business University,
@@ -142,5 +142,5 @@ Wuhan 430056, Hubei, China — 20200122@wbu.edu.cn — ORCID 0000-0002-4024-2552
 
 ## License
 
-MIT for WordTeX itself. Bundled third-party components keep their own licenses
+MIT for GalleyTeX itself. Bundled third-party components keep their own licenses
 (`vendor/LICENSES.md`); the ACM template is LPPL.

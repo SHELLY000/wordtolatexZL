@@ -1,8 +1,8 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite both the software and the paper below."
-title: "WordTeX: Word-to-LaTeX manuscript typesetting with author-in-the-loop proofreading"
+title: "GalleyTeX: Word-to-LaTeX manuscript typesetting with author-in-the-loop proofreading"
 abstract: >-
-  WordTeX converts Word (.docx) manuscripts into compilable LaTeX projects for
+  GalleyTeX converts Word (.docx) manuscripts into compilable LaTeX projects for
   journal and conference submission systems. It converts Word equations (OMML)
   to LaTeX, maps template heading styles and manually formatted headings to
   section levels, renders merged table cells, links in-text citations to the
@@ -40,7 +40,7 @@ contact:
 
 preferred-citation:
   type: article
-  title: "WordTeX: an author-in-the-loop Word-to-LaTeX typesetting pipeline for small journals and conferences"
+  title: "GalleyTeX: an author-in-the-loop Word-to-LaTeX typesetting pipeline for small journals and conferences"
   journal: "SoftwareX"
   year: 2026
   # volume: 00

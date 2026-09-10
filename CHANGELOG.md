@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Changed
+- **Renamed WordTeX to GalleyTeX** (the name WordTeX was already used by several unrelated projects). The single-file app is now `galleytex_studio.html`, the manual `GalleyTeX_USER_MANUAL.md`, the auto-compile scripts `GalleyTeX-autocompile.bat` / `galleytex-autocompile.ps1` / `galleytex-autocompile.sh`, the npm package name `galleytex`, and the language preference is stored under `localStorage["galleytex-lang"]`. Repository URL, DOI and release history are unchanged.
+
 ### Added
 - `docs/USER_MANUAL_zh.md`: Chinese user manual covering the author- and editor-facing sections of the English manual (requirements, installation, operation guide, troubleshooting, checklist glossary); replaces the former Chinese quick reference `docs/USER_MANUAL.md`.
 - CI installs `texlive-fonts-recommended` and `fonts-linuxlibertine` so the XeLaTeX example compile runs with acmart's real fonts; the compile job prints LaTeX errors as annotations and uploads `main.log`.
@@ -15,15 +18,15 @@
 ### Added
 - **Bilingual interface.** The page opens in English; the **EN / 中文** switch in the header changes to Simplified
   Chinese and back at any time, without losing the manuscript or pending edits. The choice is stored in
-  `localStorage["wordtex-lang"]`. All strings live in `src/i18n.js` (`t(key, vars)`, `data-i18n` hooks in the
+  `localStorage["galleytex-lang"]`. All strings live in `src/i18n.js` (`t(key, vars)`, `data-i18n` hooks in the
   template); manuscript recognition understands both languages regardless of the interface language.
 - `scripts/headless_run.js --lang en|zh` selects the language of the captured checklist and block labels.
 - `tests/i18n.test.js`: both tables complete, placeholders consistent, every template hook and `t()` key defined.
-- `WordTeX_USER_MANUAL.md`: full English user manual (requirements, installation, modules, API, operation guide,
+- `GalleyTeX_USER_MANUAL.md`: full English user manual (requirements, installation, modules, API, operation guide,
   validation, troubleshooting, checklist glossary).
 
 ### Changed
-- Product name in the interface is now *WordTeX*; the default venue details are unchanged.
+- Product name in the interface is now *GalleyTeX*; the default venue details are unchanged.
 - Chart placeholders embedded in the body take the language active at recognition time.
 
 ## 0.2.1 — 2026-09-09
