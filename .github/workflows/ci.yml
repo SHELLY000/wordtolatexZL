@@ -55,6 +55,23 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends texlive-xetex texlive-latex-extra texlive-fonts-extra texlive-bibtex-extra latexmk fonts-linuxlibertine
       - run: npm run build
       - run: node scripts/regression.js examples/sample_manuscript.docx --compile --out regression_out | tee regression.csv
+      - name: Show LaTeX errors (diagnostics)
+        if: always()
+        run: |
+          echo "== regression.csv =="; cat regression.csv
+          echo "::warning::$(tail -n 1 regression.csv)"
+          for log in regression_out/*/proj/main.log; do
+            [ -f "$log" ] || { echo "::error::no main.log produced"; continue; }
+            echo "== $log =="; grep -n -A4 '^!' "$log" | head -120 || true
+            grep '^!' "$log" | sort | uniq -c | sort -rn | head -6 | sed 's/^/::error::/'
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: latex-logs
+          path: |
+            regression_out/**/main.log
+            regression_out/**/main.tex
       - name: Fail on LaTeX errors
         run: |
           tail -n +2 regression.csv | awk -F, '{ if ($3 != "0") { print "LaTeX errors in " $1; exit 1 } }'
