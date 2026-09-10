@@ -52,7 +52,7 @@ jobs:
           node-version: "22"
           cache: npm
       - run: npm ci
-      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends texlive-xetex texlive-latex-extra texlive-fonts-extra texlive-bibtex-extra latexmk
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends texlive-xetex texlive-latex-extra texlive-fonts-extra texlive-bibtex-extra latexmk fonts-linuxlibertine
       - run: npm run build
       - run: node scripts/regression.js examples/sample_manuscript.docx --compile --out regression_out | tee regression.csv
       - name: Fail on LaTeX errors
