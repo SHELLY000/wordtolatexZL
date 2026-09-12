@@ -1659,11 +1659,14 @@ ${rights.join("\n")}
     zip.file(mainDir + "WORD-CONVERSION-NOTES.txt", "Generated locally from Word with the bundled acmart v2.20 template.\nMain file: " + state.templateMainPath + "\nLayout: " + (conferenceFormat() === "manuscript" ? "manuscript (submission/review, line numbers)" : "acmsmall single-column proceedings (samples/acmsmall-conf.tex)") + "\n\nCOMPILE WITH XELATEX: run `latexmk main.tex` (the bundled latexmkrc selects XeLaTeX) or choose XeLaTeX in TeXstudio.\npdflatex fails on Unicode symbols; plain xelatex without libertine/newtxmath installed silently drops some glyphs, so install the full TeX Live scheme.\n\nReview before submission: equations (converted from Word, check the LaTeX), captions, citations (linked to the reference list where they matched), tables with merged cells (multirow), and the rights block.\n");
     zip.file(mainDir + "latexmkrc", "# Compile with XeLaTeX\n$pdf_mode = 5;\n$xelatex = 'xelatex -interaction=nonstopmode -synctex=1 %O %S';\n$clean_ext = 'synctex.gz';\n");
     zip.file(mainDir + "build.bat", "@echo off\r\nlatexmk -xelatex -interaction=nonstopmode main.tex\r\npause\r\n");
-    zip.file(mainDir + "build.sh", "#!/bin/sh\nlatexmk -xelatex -interaction=nonstopmode main.tex\n");
+    // unixPermissions: without it the shebang is useless — the file unzips as 0644 and `./build.sh` fails
+    zip.file(mainDir + "build.sh", "#!/bin/sh\nlatexmk -xelatex -interaction=nonstopmode main.tex\n", { unixPermissions: "755" });
     const doc = document.createElement("div"); doc.innerHTML = state.bodyHtml;
     // Same naming as buildLatex(): EMF/WMF originals are still shipped so the author can convert them and drop them into the placeholder.
     imageManifest(doc).forEach((name, src) => { if (src.startsWith("data:")) zip.file(mainDir + "figures/" + name, dataUrlBase64(src), { base64: true }); });
-    const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
+    // platform "UNIX" is what makes the unixPermissions above survive the round trip; DOS (the JSZip default)
+    // stores DOS attributes only, so build.sh would unzip as 0644. Windows tools read UNIX-platform zips fine.
+    const blob = await zip.generateAsync({ type: "blob", platform: "UNIX", compression: "DEFLATE", compressionOptions: { level: 6 } });
     downloadBlob(blob, safeBaseName(state.file.name) + "-LaTeX-Project.zip");
     showToast(t("toast.projectGenerated"));
   }
