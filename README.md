@@ -41,7 +41,7 @@ and open it. For the headless runner, tests and builds:
 git clone https://github.com/SHELLY000/wordtolatexZL
 cd wordtolatexZL && npm ci
 npm run build        # -> galleytex_studio.html
-npm test             # 35 unit, interface-string, pipeline and regression tests (needs Node 18+)
+npm test             # 36 unit, interface-string, pipeline and regression tests (needs Node 18+)
 ```
 
 XeLaTeX (TeX Live) is only needed to compile the exported projects.

@@ -1,9 +1,33 @@
 # Changelog
 
+All notable changes are recorded here. Every released version has a git tag (`vX.Y.Z`) and a Zenodo
+deposit; `CITATION.cff` and the README badge carry the Zenodo *concept* DOI, which always resolves to the
+latest version and therefore does not change from release to release.
+
 ## Unreleased
 
+### Fixed
+- `parseXml` in `src/omml2latex.js` now rejects a `word/document.xml` that is not well-formed instead of
+  serialising the `<parsererror>` stub that `DOMParser` returns for it. Previously that stub replaced the
+  whole manuscript, and mammoth then failed with `TypeError: element.first is not a function`, so the author
+  only saw "The document could not be read". `preprocessDocx` catches the new error and keeps the original
+  XML: the equations degrade to the existing "N Word equations failed to convert" checklist warning and the
+  rest of the paper still converts. Note that the symptom used to depend on whether the manuscript contained
+  equations at all — without them `prepareDocumentXml` was never called and the same file converted fine.
+  Covered by `tests/omml2latex.test.js`.
+
+## 0.3.1 — 2026-09-11
+
+### Removed
+- The files still carrying the old name after the 0.3.0 rename: `wordtex_studio.html`,
+  `WordTeX_USER_MANUAL.md`, `scripts/autocompile/WordTeX-autocompile.bat`,
+  `scripts/autocompile/wordtex-autocompile.ps1`, `scripts/autocompile/wordtex-autocompile.sh`, and the
+  temporary `RENAME.md` note. The repository now ships one copy of the app and one copy of each script.
+
+## 0.3.0 — 2026-09-11
+
 ### Changed
-- **Renamed WordTeX to GalleyTeX** (the name WordTeX was already used by several unrelated projects). The single-file app is now `galleytex_studio.html`, the manual `GalleyTeX_USER_MANUAL.md`, the auto-compile scripts `GalleyTeX-autocompile.bat` / `galleytex-autocompile.ps1` / `galleytex-autocompile.sh`, the npm package name `galleytex`, and the language preference is stored under `localStorage["galleytex-lang"]`. Repository URL, DOI and release history are unchanged.
+- **Renamed WordTeX to GalleyTeX** (the name WordTeX was already used by several unrelated projects). The single-file app is now `galleytex_studio.html`, the manual `GalleyTeX_USER_MANUAL.md`, the auto-compile scripts `GalleyTeX-autocompile.bat` / `galleytex-autocompile.ps1` / `galleytex-autocompile.sh`, the npm package name `galleytex`, and the language preference is stored under `localStorage["galleytex-lang"]`. Repository URL and release history are unchanged.
 
 ### Added
 - `docs/USER_MANUAL_zh.md`: Chinese user manual covering the author- and editor-facing sections of the English manual (requirements, installation, operation guide, troubleshooting, checklist glossary); replaces the former Chinese quick reference `docs/USER_MANUAL.md`.
@@ -11,7 +35,6 @@
 
 ### Changed
 - `npm test` runs `node --test` without a shell glob, so it works on Windows with Node 18 and 20.
-- `CITATION.cff` and the README badge carry the Zenodo DOI 10.5281/zenodo.22692708.
 
 ## 0.2.2 — 2026-09-09
 

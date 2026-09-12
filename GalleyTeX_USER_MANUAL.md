@@ -1,6 +1,6 @@
 # GalleyTeX User Manual
 
-**Version 0.2.2** · Word (.docx) → LaTeX manuscript typesetting with author-in-the-loop proofreading
+**Version 0.3.1** · Word (.docx) → LaTeX manuscript typesetting with author-in-the-loop proofreading
 
 ---
 
@@ -59,7 +59,7 @@ GalleyTeX closes that loop. Conversion runs entirely in the browser. Every recog
 | LaTeX target | ACM `acmart` 2.20 (LPPL 1.3c), bundled as a base64 ZIP; compiled with **XeLaTeX** |
 | Build | `scripts/build.js` inlines `src/`, `vendor/` and `templates/` into one HTML file |
 | Headless harness | Node ≥ 18 + jsdom (`scripts/headless_run.js`, `scripts/regression.js`) |
-| Tests | `node --test` — 35 unit, pipeline, regression and interface-string tests |
+| Tests | `node --test` — 36 unit, pipeline, regression and interface-string tests |
 | Continuous integration | GitHub Actions — Ubuntu, Windows, macOS × Node 18, 20, 22; build artifact; XeLaTeX compile of the example |
 | License | MIT (third-party licences in `vendor/LICENSES.md`) |
 
@@ -141,7 +141,7 @@ npm run build          # -> galleytex_studio.html
 
 ```bash
 npm test
-# 35 tests: OMML unit tests, interface-string tests, pipeline test on
+# 36 tests: OMML unit tests, interface-string tests, pipeline test on
 # examples/sample_manuscript.docx, regression test on a synthetic WordprocessingML manuscript
 
 node scripts/headless_run.js galleytex_studio.html examples/sample_manuscript.docx out/
@@ -515,11 +515,11 @@ The 39 equations of m01 were also converted with Pandoc. After normalisation the
 
 ### 8.3 Regression Tests
 
-`npm test` runs 35 tests on every push, on three operating systems and three Node versions:
+`npm test` runs 36 tests on every push, on three operating systems and three Node versions:
 
 | Suite | Cases | What is checked |
 |---|---|---|
-| `tests/omml2latex.test.js` | 28 | one case per OMML construct (fraction, scripts, radicals, n-ary, delimiters, matrix, accents, limits, functions, run styles, arrays, escapes); numbered equations; table-cell inlining; placeholder injection; text-mode escaping; split equation numbers |
+| `tests/omml2latex.test.js` | 29 | one case per OMML construct (fraction, scripts, radicals, n-ary, delimiters, matrix, accents, limits, functions, run styles, arrays, escapes); numbered equations; table-cell inlining; placeholder injection; text-mode escaping; split equation numbers; rejection of a malformed `document.xml` |
 | `tests/pipeline.test.js` | 1 | build the app, convert `examples/sample_manuscript.docx` headlessly, assert title, authors, corresponding flag, country, keywords, `\section`/`\subsection`, `\tag{1}`, `\frac`/`\sum`, `\multirow`, captions, `\cite{ref1}`, `\cite{ref2,ref3}`, three `\bibitem`s, the exported figure and the bundled `acmart.cls` |
 | `tests/regressions.test.js` | 1 | a synthetic manuscript written as raw WordprocessingML covering the 0.2.1 fixes: backslash escaping, `[n]` inside math, text runs inside formulas, split equation numbers, images in table cells, figure de-duplication and label uniqueness, URLs in the abstract |
 | `tests/i18n.test.js` | 5 | English is the default; both string tables have the same keys and the same `{placeholders}`; every `data-i18n` hook in the template and every `t("key")` in the application resolves |
@@ -640,8 +640,9 @@ A fourth CI job installs TeX Live, compiles the example project with XeLaTeX and
 
 ### 10.2 Version
 
-- **Current version:** 0.2.2
-- **Released:** 2026-09-09
+- **Current version:** 0.3.1
+- **Released:** 2026-09-11
+- **Archive:** Zenodo, https://doi.org/10.5281/zenodo.22694058
 - **License:** MIT (bundled components: mammoth.js BSD-2-Clause, JSZip MIT, KaTeX MIT, acmart LPPL 1.3c — see `vendor/LICENSES.md`)
 
 ### 10.3 Authors
@@ -770,4 +771,4 @@ wordtolatexZL/
 
 ---
 
-*GalleyTeX 0.2.2 · MIT License · Copyright © 2026 Li Zhou*
+*GalleyTeX 0.3.1 · MIT License · Copyright © 2026 Li Zhou*

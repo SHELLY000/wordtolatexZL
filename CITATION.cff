@@ -17,6 +17,9 @@ date-released: "2026-09-11"
 license: MIT
 repository-code: "https://github.com/SHELLY000/wordtolatexZL"
 url: "https://github.com/SHELLY000/wordtolatexZL"
+# Zenodo concept DOI ("Cite all versions" on the record page): it resolves to the newest release and does
+# not change when a new version is deposited. Do not replace it with a version-specific DOI — a tagged
+# release would then contain a DOI pointing at a different deposit than the one archived from that tag.
 doi: "10.5281/zenodo.22694058"
 keywords:
   - Word to LaTeX

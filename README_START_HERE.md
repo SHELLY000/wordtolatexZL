@@ -20,7 +20,7 @@
 ```bash
 npm ci
 npm run build                                  # 从 src/ vendor/ templates/ 拼出 galleytex_studio.html
-npm test                                       # 35 个测试（公式转换、界面文案、端到端、回归）
+npm test                                       # 36 个测试（公式转换、界面文案、端到端、回归）
 node scripts/headless_run.js galleytex_studio.html paper.docx out/     # 无浏览器转换，输出 ui_report.json 和 project.zip
 node scripts/regression.js manuscripts/ --compile                    # 批量回归，一篇一行 CSV，可选 XeLaTeX 编译
 ```
@@ -39,6 +39,8 @@ node scripts/regression.js manuscripts/ --compile                    # 批量回
 | `validation_results/` | 七篇真实稿件改进前后的统计 |
 | `docs/` | `USER_MANUAL_zh.md` 中文手册（安装、操作、常见问题、检查清单）、`ARCHITECTURE.md` 架构说明；根目录 `GalleyTeX_USER_MANUAL.md` 为完整英文手册（含模块、API、验证） |
 
-## 发布前请改的地方
+## 引用
 
-- 第一次发布后在 Zenodo 取 DOI，填回 `CITATION.cff` 和 README 的徽章。
+本项目已在 Zenodo 归档，DOI 见 README 的徽章；机器可读的引用信息在 `CITATION.cff`。
+`CITATION.cff` 里填的是 concept DOI（Zenodo 记录页上的 "Cite all versions"），它始终指向最新版本，
+发新版时**不需要**改动。
