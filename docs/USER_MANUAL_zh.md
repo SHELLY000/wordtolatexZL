@@ -1,6 +1,6 @@
 # GalleyTeX 用户手册（中文）
 
-**版本 0.2.2** · Word (.docx) → LaTeX 论文排版，作者逐块校对
+**版本 0.3.1** · Word (.docx) → LaTeX 论文排版，作者逐块校对
 
 本手册翻译并整理了英文完整手册 `GalleyTeX_USER_MANUAL.md` 中面向**作者和编辑部**的部分：系统要求、安装、操作指南、常见问题、检查清单说明。面向开发者的内容（功能模块、API 参考、验证数据、仓库结构、转义规则）请看英文手册第 4、5、8 节和附录 A、C、D、F。
 
@@ -110,7 +110,7 @@ npm run build          # -> galleytex_studio.html
 
 ```bash
 npm test
-# 35 个测试：OMML 单元测试、界面文案测试、示例稿的流水线测试、回归测试
+# 36 个测试：OMML 单元测试、界面文案测试、示例稿的流水线测试、回归测试
 
 node scripts/headless_run.js galleytex_studio.html examples/sample_manuscript.docx out/
 # 产生 out/ui_report.json  out/preview.html  out/project.zip
@@ -376,9 +376,9 @@ node scripts/regression.js submissions/ --compile --out build/ | tee submissions
 
 - **仓库**：https://github.com/SHELLY000/wordtolatexZL
 - **问题反馈**：https://github.com/SHELLY000/wordtolatexZL/issues
-- **当前版本**：0.2.2（2026-09-09）
+- **当前版本**：0.3.1（2026-09-11）
 - **许可证**：MIT（内置组件：mammoth.js BSD-2-Clause、JSZip MIT、KaTeX MIT、acmart LPPL 1.3c，见 `vendor/LICENSES.md`）
-- **归档**：Zenodo，https://doi.org/10.5281/zenodo.22692708
+- **归档**：Zenodo，https://doi.org/10.5281/zenodo.22694058
 - **维护者**：Li Zhou，School of Economics, Wuhan Business University，20200122@wbu.edu.cn，ORCID 0000-0002-4024-2552
 
 引用本软件请同时引用软件本身和配套的 SoftwareX 论文（发表后）；机器可读的引用信息在 `CITATION.cff`。
@@ -387,4 +387,4 @@ node scripts/regression.js submissions/ --compile --out build/ | tee submissions
 
 ---
 
-*GalleyTeX 0.2.2 · MIT License · Copyright © 2026 Li Zhou*
+*GalleyTeX 0.3.1 · MIT License · Copyright © 2026 Li Zhou*
