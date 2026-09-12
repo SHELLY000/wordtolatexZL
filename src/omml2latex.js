@@ -309,7 +309,15 @@
   }
   function parseXml(xml) {
     if (!dom.DOMParser) throw new Error("No DOMParser available; call setDomImplementation({ DOMParser, XMLSerializer })");
-    return new dom.DOMParser().parseFromString(xml, "application/xml");
+    const doc = new dom.DOMParser().parseFromString(xml, "application/xml");
+    // DOMParser reports XML errors by *returning a document* whose root is <parsererror>, it does not throw.
+    // Serialising that stub would replace the whole manuscript with an error message, so refuse it here and
+    // let the caller keep the original document.xml (equations degrade, the rest of the paper still converts).
+    const err = doc.getElementsByTagName("parsererror")[0];
+    if (err || !doc.documentElement || doc.documentElement.localName === "parsererror") {
+      throw new Error("word/document.xml is not well-formed XML: " + ((err && err.textContent) || "no document element").replace(/\s+/g, " ").trim().slice(0, 200));
+    }
+    return doc;
   }
   function paragraphsOf(doc) {
     const all = doc.getElementsByTagNameNS ? doc.getElementsByTagNameNS(W_NS, "p") : doc.getElementsByTagName("w:p");
