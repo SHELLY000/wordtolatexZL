@@ -11,7 +11,7 @@
  *
  * This is the same code path a user exercises by hand, so it doubles as the regression harness (scripts/regression.js).
  */
-const { JSDOM } = require("jsdom");
+const { JSDOM, VirtualConsole } = require("jsdom");
 const NodeZip = require("jszip");
 const fs = require("fs");
 const path = require("path");
@@ -31,10 +31,20 @@ function pngSize(dataUrl) {
 }
 
 const captured = [];
+// Exporting the project clicks an <a download href="blob:…">; jsdom cannot navigate and reports
+// "Not implemented: navigation (except hash changes)" with a stack trace on every single run, which reads
+// like a failure in the CI log. Drop that one error and let every other page error through unchanged.
+const virtualConsole = new VirtualConsole();
+virtualConsole.sendTo(console, { omitJSDOMErrors: true });
+virtualConsole.on("jsdomError", (error) => {
+  if (/Not implemented: navigation/.test(error.message || "")) return;
+  console.error("[page]", error.stack || error.message);
+});
 const dom = new JSDOM(fs.readFileSync(HTML, "utf8"), {
   runScripts: "dangerously",
   url: "http://localhost/",
   pretendToBeVisual: true,
+  virtualConsole,
   beforeParse(window) {
     // jsdom stalls the page's own JSZip streams, so the page gets Node's jszip with realm-safe buffers.
     const toBuf = (x) => (x instanceof Buffer ? x : Buffer.from(new Uint8Array(x)));
