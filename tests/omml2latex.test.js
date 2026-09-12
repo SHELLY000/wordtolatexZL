@@ -75,3 +75,13 @@ test("an equation number split over several runs is removed completely", () => {
   assert.ok(!/<w:tab\/>/.test(out.xml), "the tab before the number is gone too");
   assert.ok(/footnoteReference/.test(out.xml), "runs that are not plain text are kept");
 });
+
+// --- malformed input ---------------------------------------------------------------------------
+test("a document.xml that is not well-formed is rejected, not serialised back as a parsererror stub", () => {
+  // DOMParser signals XML errors by returning a <parsererror> document rather than throwing; serialising it
+  // used to overwrite the manuscript with the error message, so mammoth then failed with an opaque TypeError.
+  const bad = "<w:document " + NS + "><w:body><w:p><w:r><w:t>Smith & Jones</w:t></w:r></w:p>" +
+    "<w:p><m:oMath>" + r("x") + "</m:oMath></w:p></w:body></w:document>";
+  assert.throws(() => O.prepareDocumentXml(bad), /not well-formed/);
+  assert.throws(() => O.extractEquations(bad), /not well-formed/);
+});
