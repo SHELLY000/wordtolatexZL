@@ -378,7 +378,7 @@ node scripts/regression.js submissions/ --compile --out build/ | tee submissions
 - **问题反馈**：https://github.com/SHELLY000/wordtolatexZL/issues
 - **当前版本**：0.3.1（2026-09-11）
 - **许可证**：MIT（内置组件：mammoth.js BSD-2-Clause、JSZip MIT、KaTeX MIT、acmart LPPL 1.3c，见 `vendor/LICENSES.md`）
-- **归档**：Zenodo，https://doi.org/10.5281/zenodo.22694058
+- **归档**：Zenodo，https://doi.org/10.5281/zenodo.22692707
 - **维护者**：Li Zhou，School of Economics, Wuhan Business University，20200122@wbu.edu.cn，ORCID 0000-0002-4024-2552
 
 引用本软件请同时引用软件本身和配套的 SoftwareX 论文（发表后）；机器可读的引用信息在 `CITATION.cff`。
