@@ -642,7 +642,7 @@ A fourth CI job installs TeX Live, compiles the example project with XeLaTeX and
 
 - **Current version:** 0.3.1
 - **Released:** 2026-09-11
-- **Archive:** Zenodo, https://doi.org/10.5281/zenodo.22694058
+- **Archive:** Zenodo, https://doi.org/10.5281/zenodo.22692707
 - **License:** MIT (bundled components: mammoth.js BSD-2-Clause, JSZip MIT, KaTeX MIT, acmart LPPL 1.3c — see `vendor/LICENSES.md`)
 
 ### 10.3 Authors
