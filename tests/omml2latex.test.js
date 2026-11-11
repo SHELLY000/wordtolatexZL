@@ -17,6 +17,8 @@ const one = (body, inTable) => {
 const cases = {
   fraction: ["<m:f><m:num>" + r("a+b") + "</m:num><m:den>" + r("2") + "</m:den></m:f>", "\\frac{a+b}{2}"],
   subscript: ["<m:sSub><m:e>" + r("x") + "</m:e><m:sub>" + r("i") + "</m:sub></m:sSub>", "{x}_{i}"],
+  unicode_scripts_across_runs: [r("α₀+X₁") + r("ᵢₜ") + r("²"), "\\alpha_{0}+X_{1it}^{2}"],
+  unicode_scripts_in_text: [r("Group₁ᴷ", "<m:rPr><m:nor/></m:rPr>"), "\\text{Group\\textsubscript{1}\\textsuperscript{K}}"],
   subsup: ["<m:sSubSup><m:e>" + r("health") + "</m:e><m:sub>" + r("i") + "</m:sub><m:sup>" + r("2") + "</m:sup></m:sSubSup>", "{health}_{i}^{2}"],
   greek: [r("α+β≤∞"), "\\alpha+\\beta\\leq\\infty"],
   sum: ["<m:nary><m:naryPr><m:chr m:val=\"∑\"/><m:limLoc m:val=\"undOvr\"/></m:naryPr><m:sub>" + r("n=1") + "</m:sub><m:sup>" + r("4") + "</m:sup><m:e>" + r("x") + "</m:e></m:nary>", "\\sum_{n=1}^{4}{x}"],

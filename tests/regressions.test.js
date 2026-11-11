@@ -19,6 +19,11 @@ const mr = (t) => "<m:r><m:t>" + t + "</m:t></m:r>";
 const cuberoot = "<m:oMath><m:rad><m:radPr><m:degHide m:val=\"0\"/></m:radPr><m:deg>" + mr("3") + "</m:deg><m:e>" + mr("x") + "</m:e></m:rad></m:oMath>";
 const numbered = "<w:p><m:oMathPara><m:oMath>" + mr("E=m") + "<m:sSup><m:e>" + mr("c") + "</m:e><m:sup>" + mr("2") + "</m:sup></m:sSup></m:oMath></m:oMathPara><w:r><w:tab/></w:r><w:r><w:t>(</w:t></w:r><w:r><w:t>1</w:t></w:r><w:r><w:t>)</w:t></w:r></w:p>";
 const mixed = '<w:p><w:r><w:t xml:space="preserve">Rate </w:t></w:r><m:oMath>' + mr("r=") + "<w:r><w:t>x_max %</w:t></w:r></m:oMath><w:r><w:t xml:space=\"preserve\"> is used.</w:t></w:r></w:p>";
+const nestedTable = "<w:tbl><w:tblGrid><w:gridCol/></w:tblGrid><w:tr><w:tc>" +
+  "<w:tbl><w:tblGrid><w:gridCol/><w:gridCol/></w:tblGrid><w:tr><w:tc>" +
+  p("Nested cell heading", "Heading1") + "</w:tc><w:tc>" +
+  "<w:p><w:r><w:rPr><w:b/></w:rPr><w:t>Nested header</w:t><w:br/><w:t>second line</w:t></w:r></w:p>" +
+  "</w:tc></w:tr></w:tbl>" + p("Text after nested table.") + "</w:tc></w:tr></w:tbl>";
 
 const body = [
   p("A Regression Manuscript", "Title"),
@@ -33,6 +38,8 @@ const body = [
   numbered,
   mixed,
   p("2 Data", "Heading1"),
+  "<w:p><w:r><w:br/><w:t>Line break before this text.</w:t></w:r></w:p>",
+  nestedTable,
   "<w:tbl><w:tblGrid><w:gridCol/><w:gridCol/></w:tblGrid><w:tr><w:tc><w:p><w:r><w:t>Name</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:t>Picture</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:tc><w:p><w:r><w:t>Row</w:t></w:r></w:p></w:tc><w:tc><w:p>" + drawing(1) + "</w:p></w:tc></w:tr></w:tbl>",
   p("Table 1. A table with a picture in it."),
   "<w:p>" + drawing(2) + "</w:p>",
@@ -89,4 +96,9 @@ test("regressions: escaping, citation linking, equation numbers, table images, f
   assert.match(tex, /\\label\{fig:word-figure-01-2\}/);
   // abstract goes through texText: bare URLs are wrapped
   assert.match(tex, /\\url\{https:\/\/example\.org\/x\}/);
+  // A leading Word break cannot emit a standalone LaTeX line break. Nested tables stay inline.
+  assert.doesNotMatch(tex, /\\\\\s*Line break before this text/);
+  assert.match(tex, /Line break before this text\./);
+  assert.match(tex, /\{\\begin\{tabular\}\{.*\\textbf\{Nested cell heading\} & \\textbf\{Nested header second line\}.*\\end\{tabular\}\} Text after nested table\./);
+  assert.doesNotMatch(tex, /\\(?:sub)*section\{Nested cell heading\}/);
 });

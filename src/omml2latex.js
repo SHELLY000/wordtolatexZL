@@ -72,7 +72,17 @@
   const ESCAPES = { "%": "\\%", "&": "\\&", "#": "\\#", "$": "\\$", "_": "\\_", "{": "\\{", "}": "\\}", "~": "\\sim", "\\": "\\backslash", "^": "\\hat{}" };
   // inside \text{...} (text mode) \backslash and \hat{} are not allowed, so text runs use the text-mode commands
   const TEXT_ESCAPES = { "%": "\\%", "&": "\\&", "#": "\\#", "$": "\\$", "_": "\\_", "{": "\\{", "}": "\\}", "~": "\\textasciitilde{}", "\\": "\\textbackslash{}", "^": "\\textasciicircum{}" };
-  function textModeEscape(text) { return Array.from(text).map((ch) => TEXT_ESCAPES[ch] || ch).join(""); }
+  const UNICODE_SUBSCRIPT = /[₀-₉₊₋₌₍₎ₐₑₒₓₔₕₖₗₘₙₚₛₜᵢⱼᵣᵤᵥ]/u;
+  const UNICODE_SUPERSCRIPT = /[⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ⁱⁿᴷᵀ]/u;
+  const UNICODE_SCRIPTS = new RegExp("(?:"
+    + UNICODE_SUBSCRIPT.source + "|" + UNICODE_SUPERSCRIPT.source + ")+", "gu");
+  function textModeEscape(text) {
+    return Array.from(text).map((ch) => {
+      if (UNICODE_SUBSCRIPT.test(ch)) return "\\textsubscript{" + ch.normalize("NFKC") + "}";
+      if (UNICODE_SUPERSCRIPT.test(ch)) return "\\textsuperscript{" + ch.normalize("NFKC") + "}";
+      return TEXT_ESCAPES[ch] || ch;
+    }).join("");
+  }
   const FUNCTIONS = ["sin", "cos", "tan", "cot", "sec", "csc", "arcsin", "arccos", "arctan", "sinh", "cosh", "tanh", "coth", "log", "ln", "lg", "exp",
     "max", "min", "sup", "inf", "lim", "liminf", "limsup", "det", "dim", "gcd", "hom", "ker", "arg", "deg", "Pr"];
   const NARY = { "∑": "\\sum", "∏": "\\prod", "∐": "\\coprod", "∫": "\\int", "∬": "\\iint", "∭": "\\iiint", "∮": "\\oint", "∯": "\\oint",
@@ -258,7 +268,17 @@
     }
   }
 
-  function ommlToLatex(node) { return conv(node, {}).replace(/\s+$/, "").replace(/^\s+/, ""); }
+  function ommlToLatex(node) {
+    // Group adjacent Unicode indices after joining Word runs, so a split index stays a single TeX script.
+    return conv(node, {}).trim().replace(UNICODE_SCRIPTS, (characters) => {
+      let subscript = "", superscript = "";
+      for (const ch of characters) {
+        if (UNICODE_SUBSCRIPT.test(ch)) subscript += ch.normalize("NFKC");
+        else superscript += ch.normalize("NFKC");
+      }
+      return (subscript ? "_{" + subscript + "}" : "") + (superscript ? "^{" + superscript + "}" : "");
+    });
+  }
 
   // ---------------------------------------------------------------------------
   // Paragraph / document level

@@ -87,9 +87,12 @@
     "→": "\\ensuremath{\\rightarrow}", "←": "\\ensuremath{\\leftarrow}", "↔": "\\ensuremath{\\leftrightarrow}", "⇒": "\\ensuremath{\\Rightarrow}", "⇐": "\\ensuremath{\\Leftarrow}", "⇔": "\\ensuremath{\\Leftrightarrow}", "↑": "\\ensuremath{\\uparrow}", "↓": "\\ensuremath{\\downarrow}", "↦": "\\ensuremath{\\mapsto}",
     "ℝ": "\\ensuremath{\\mathbb{R}}", "ℕ": "\\ensuremath{\\mathbb{N}}", "ℤ": "\\ensuremath{\\mathbb{Z}}", "ℚ": "\\ensuremath{\\mathbb{Q}}", "ℂ": "\\ensuremath{\\mathbb{C}}", "ℓ": "\\ensuremath{\\ell}", "ℏ": "\\ensuremath{\\hbar}", "°": "\\ensuremath{^{\\circ}}", "′": "\\ensuremath{^{\\prime}}", "″": "\\ensuremath{^{\\prime\\prime}}", "‰": "\\textperthousand{}", "•": "\\textbullet{}", "§": "\\S{}", "¶": "\\P{}", "©": "\\copyright{}", "®": "\\textregistered{}", "™": "\\texttrademark{}", "†": "\\dag{}", "‡": "\\ddag{}",
     "¹": "\\textsuperscript{1}", "²": "\\textsuperscript{2}", "³": "\\textsuperscript{3}", "⁰": "\\textsuperscript{0}", "⁴": "\\textsuperscript{4}", "⁵": "\\textsuperscript{5}", "⁶": "\\textsuperscript{6}", "⁷": "\\textsuperscript{7}", "⁸": "\\textsuperscript{8}", "⁹": "\\textsuperscript{9}", "₀": "\\textsubscript{0}", "₁": "\\textsubscript{1}", "₂": "\\textsubscript{2}", "₃": "\\textsubscript{3}", "₄": "\\textsubscript{4}", "₅": "\\textsubscript{5}", "₆": "\\textsubscript{6}", "₇": "\\textsubscript{7}", "₈": "\\textsubscript{8}", "₉": "\\textsubscript{9}", "½": "1/2", "¼": "1/4", "¾": "3/4",
-    "–": "--", "—": "---", "…": "\\ldots{}", "“": "``", "”": "''", "‘": "`", "’": "'", "„": ",,", "\u00a0": "~", "\u202f": "~", "\u2009": "\\,", "\u200b": "", "\ufeff": "", "\u2028": " "
+    "–": "--", "—": "---", "…": "\\ldots{}", "“": "``", "”": "''", "‘": "`", "’": "'", "„": ",,", "\u00a0": "~", "\u202f": "~", "\u2009": "\\,", "\u200b": "", "\ufeff": "", "\u2028": " ",
+    "ᵢ": "\\textsubscript{i}", "ⱼ": "\\textsubscript{j}", "ₜ": "\\textsubscript{t}", "ᴷ": "\\textsuperscript{K}", "ᵀ": "\\textsuperscript{T}",
+    "⟶": "\\ensuremath{\\longrightarrow}", "𝒞": "\\ensuremath{\\mathcal{C}}",
+    "𝑖": "\\ensuremath{i}", "𝑥": "\\ensuremath{x}", "𝑅": "\\ensuremath{R}", "𝑑": "\\ensuremath{d}", "𝑦": "\\ensuremath{y}"
   };
-  const TEX_SYMBOL_RE = new RegExp("[" + Object.keys(TEX_SYMBOLS).map((c) => "\\u" + c.codePointAt(0).toString(16).padStart(4, "0")).join("") + "]", "g");
+  const TEX_SYMBOL_RE = new RegExp("[" + Object.keys(TEX_SYMBOLS).map((c) => "\\u{" + c.codePointAt(0).toString(16) + "}").join("") + "]", "gu");
   const URL_RE = /((?:https?:\/\/|www\.)[^\s<>"'（）()]+)/g;
 
   const $ = (id) => document.getElementById(id);
@@ -1437,49 +1440,60 @@ ${rights.join("\n")}
 
   function extractLatexArgument(text, command) { const range = latexCommandRange(text, command); if (!range) return ""; const raw = text.slice(range.start, range.end); const open = raw.indexOf("{"); return open >= 0 ? raw.slice(open + 1, -1) : ""; }
 
-  function nodeToLatex(root) {
+  function nodeToLatex(root, inCell = false) {
     return [...root.childNodes].map((node) => {
       if (node.__consumed) return "";
       if (node.nodeType === Node.TEXT_NODE) return texText(node.textContent);
       if (node.nodeType !== Node.ELEMENT_NODE) return "";
       const tag = node.tagName.toLowerCase();
-      const inner = () => nodeToLatex(node);
+      const inner = () => nodeToLatex(node, inCell);
       if (/^h[1-6]$/.test(tag)) {
+        if (inCell) return "\\textbf{" + inner().trim() + "}";
         const title = stripNumber(node.textContent);
         if (REFERENCES_RE.test(title)) return bibliographyToLatex(node);
         if (/^(acknowledg(e)?ments?|致谢)$/i.test(title)) return acksToLatex(node);
         const cmd = state.headingMap[node.tagName] || "section";
         return (cmd === "section" ? "\n\\FloatBarrier" : "") + "\n\\" + cmd + "{" + texEscape(title) + "}\n";
       }
-      if (tag === "span" && node.classList.contains("math")) return mathToLatex(node);
-      if (tag === "span" && node.classList.contains("placeholder-chart")) return chartPlaceholderToLatex(node);
+      if (tag === "span" && node.classList.contains("math")) return mathToLatex(node, !inCell && node.dataset.display === "1");
+      if (tag === "span" && node.classList.contains("placeholder-chart")) {
+        return inCell ? "\\fbox{\\small [Word chart]}" : chartPlaceholderToLatex(node);
+      }
       if (tag === "p") {
         const display = node.querySelector("img.img-display");
-        if (display) return [...node.querySelectorAll("img.img-display")].map(imageToLatex).join("");
+        if (display && !inCell) return [...node.querySelectorAll("img.img-display")].map(imageToLatex).join("");
         const math = node.querySelector("span.math");
-        if (math && math.dataset.display === "1" && !node.textContent.replace(math.textContent, "").replace(/[\s()（）\d]/g, "")) return mathToLatex(math, true);
+        if (!inCell && math && math.dataset.display === "1" && !node.textContent.replace(math.textContent, "").replace(/[\s()（）\d]/g, "")) return mathToLatex(math, true);
         return inner().trim() + "\n\n";
       }
       if (tag === "strong" || tag === "b") return "\\textbf{" + inner() + "}";
       if (tag === "em" || tag === "i") return "\\textit{" + inner() + "}";
       if (tag === "sup") return "\\textsuperscript{" + inner() + "}";
       if (tag === "sub") return "\\textsubscript{" + inner() + "}";
-      if (tag === "br") return "\\\\\n";
+      if (tag === "br") {
+        if (inCell) return " ";
+        const paragraph = node.closest("p, li");
+        if (!paragraph || node.previousSibling?.nodeName === "BR") return "";
+        // A forced break at the beginning of a Word paragraph has no LaTeX line to end.
+        const preceding = document.createRange();
+        preceding.selectNodeContents(paragraph);
+        preceding.setEndBefore(node);
+        return preceding.toString().trim() ? "\\\\\n" : "";
+      }
       if (tag === "ul" || tag === "ol") return "\n\\begin{" + (tag === "ul" ? "itemize" : "enumerate") + "}\n" + inner() + "\\end{" + (tag === "ul" ? "itemize" : "enumerate") + "}\n";
       if (tag === "li") return "\\item " + inner().trim() + "\n";
       if (tag === "a") { const href = node.getAttribute("href") || ""; if (!href || /^#/.test(href)) return inner(); if (node.textContent.trim() === href) return "\\url{" + urlEscape(href) + "}"; return "\\href{" + urlEscape(href) + "}{" + inner() + "}"; }
       if (tag === "img") return imageToLatex(node);
-      if (tag === "table") return tableToLatex(node);
+      if (tag === "table") return tableToLatex(node, inCell);
       if (tag === "figcaption") return "\\begin{center}\\small " + inner().trim() + "\\end{center}\n\n";
       if (tag === "span" && node.classList.contains("footnote")) return "\\footnote{" + inner().trim() + "}";
       return inner();
     }).join("");
   }
 
-  function mathToLatex(span, forceDisplay) {
+  function mathToLatex(span, display) {
     const latex = span.textContent.trim();
     if (!latex) return "";
-    const display = forceDisplay || span.dataset.display === "1";
     if (!display) return "$" + latex + "$";
     const tag = span.dataset.tag;
     if (tag) return "\n\\begin{equation}\\tag{" + texEscape(tag) + "}\\label{" + uniqueLabel("eq:" + tag.replace(/[^\w.-]/g, "")) + "}\n" + latex + "\n\\end{equation}\n";
@@ -1561,9 +1575,9 @@ ${rights.join("\n")}
   }
 
   // Expand rowspan/colspan into a full grid so merged cells map to \multirow / \multicolumn instead of shifting later rows left.
-  function tableToLatex(table) {
+  function tableToLatex(table, inline = false) {
     const cellText = (cell) => { const clone = cell.cloneNode(true); clone.querySelectorAll(".footnote").forEach((n) => { n.replaceWith(" (" + n.textContent.trim() + ")"); }); clone.querySelectorAll("img").forEach((n) => n.classList.add("img-cell")); return clone; };
-    const cellLatex = (cell) => nodeToLatex(cellText(cell)).replace(/\s+/g, " ").trim();
+    const cellLatex = (cell) => nodeToLatex(cellText(cell), true).replace(/\s+/g, " ").trim();
     const grid = [];
     [...table.rows].forEach((row, r) => {
       grid[r] = grid[r] || [];
@@ -1601,6 +1615,12 @@ ${rights.join("\n")}
       }
       lines.push(parts.join(" & ") + " \\\\ " + rule);
     });
+    if (inline) {
+      // Floats and page-breaking tables cannot occur inside another table's cell.
+      const width = "\\dimexpr\\linewidth/" + cols + "-2\\tabcolsep-2\\arrayrulewidth\\relax";
+      const colSpec = "|" + Array(cols).fill(">{\\raggedright\\arraybackslash}p{" + width + "}").join("|") + "|";
+      return "{\\begin{tabular}{" + colSpec + "}\n\\hline\n" + lines.join("\n") + "\n\\end{tabular}}\n";
+    }
     const caption = table.__caption || "Table caption";
     state.tableCounter = (state.tableCounter || 0) + 1;
     const colSpec = "|" + Array(cols).fill(">{\\raggedright\\arraybackslash}X").join("|") + "|";

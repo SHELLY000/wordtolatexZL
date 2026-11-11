@@ -7,6 +7,10 @@ latest version and therefore does not change from release to release.
 ## Unreleased
 
 ### Fixed
+- Ignore leading manual line breaks that have no LaTeX line to end. Inside table cells, render
+  headings as inline text, use wrapping for manual breaks, and keep nested tables inline.
+- Render Unicode subscript and superscript runs in Word equations with grouped LaTeX indices,
+  including when Word splits an index across several runs.
 - `parseXml` in `src/omml2latex.js` now rejects a `word/document.xml` that is not well-formed instead of
   serialising the `<parsererror>` stub that `DOMParser` returns for it. Previously that stub replaced the
   whole manuscript, and mammoth then failed with `TypeError: element.first is not a function`, so the author
