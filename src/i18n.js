@@ -231,7 +231,7 @@
       "checks.inferred.warn": "{n} headings were inferred from bold text — confirm their level in the proofreading panel",
       "checks.cites.linked": "In-text citations linked to the reference list ({n})",
       "checks.cites.pending": "Citation linking: applied on export",
-      "checks.cites.warn": "{n} in-text citations could not be matched to the reference list — check them after export",
+      "checks.cites.warn": "{n} in-text citations could not be matched uniquely and were kept as text. Check the citations and reference numbering.",
       "checks.country.ok": "Author countries entered",
       "checks.country.warn": "{n} authors without a country / region (required by the ACM template)",
       "checks.length.ok": "Abstract and keyword lengths normal",
@@ -251,7 +251,7 @@
       "export.float.auto": "LaTeX-optimised (same or next page, within the section)",
       "export.float.here": "Keep the Word position ([H])",
       "export.noticeTitle": "About the exported project",
-      "export.noticeText": "Unzip the project and open main.tex in TeXstudio; compile with XeLaTeX. Word equations have been converted to LaTeX and can be edited in the proofreading panel; images and charts that cannot be converted become placeholder boxes, so the project always compiles. The browser PDF is a preview only — compile the project for the final PDF."
+      "export.noticeText": "Unzip the project and open main.tex in TeXstudio. Review any placeholders and checklist warnings, then verify the output by compiling with XeLaTeX. You can edit converted equations in the proofreading panel. The browser PDF is a preview only."
     },
 
     zh: {
@@ -463,7 +463,7 @@
       "checks.inferred.warn": "{n} 个标题由加粗文字推断，请在校对框确认层级",
       "checks.cites.linked": "文内引用已关联参考文献（{n} 处）",
       "checks.cites.pending": "文内引用关联：导出时处理",
-      "checks.cites.warn": "{n} 处文内引用未能与参考文献匹配，导出后请检查",
+      "checks.cites.warn": "{n} 处文内引用无法唯一匹配，已保留为文本。请核对引文和参考文献编号。",
       "checks.country.ok": "作者国家已填写",
       "checks.country.warn": "{n} 位作者缺少国家/地区（ACM 模板必填）",
       "checks.length.ok": "摘要/关键词长度正常",
@@ -483,7 +483,7 @@
       "export.float.auto": "LaTeX 自动优化（同页或次页，章节内）",
       "export.float.here": "严格保持 Word 原位（[H]）",
       "export.noticeTitle": "完整项目说明",
-      "export.noticeText": "ZIP 解压后可直接在 TeXstudio 中打开 main.tex，用 XeLaTeX 编译。Word 公式已转换为 LaTeX，可在校对面板直接修改；无法转换的图片和图表会以占位框代替，项目始终可以编译。浏览器 PDF 只用于预览，正式 PDF 请使用完整项目编译。"
+      "export.noticeText": "解压 ZIP 后在 TeXstudio 中打开 main.tex。请检查占位框和校对提示，然后用 XeLaTeX 编译验证输出。转换后的公式可在校对面板编辑，浏览器 PDF 仅供预览。"
     }
   };
 

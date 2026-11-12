@@ -89,6 +89,11 @@ const val = (id) => (doc.getElementById(id) || {}).value || "";
   for (let i = 0; i < 300; i++) { await sleep(200); const btn = doc.getElementById("nextBtn"); if (btn && !btn.disabled && !/正在|recognising/i.test(text("fileMeta"))) break; }
   await sleep(1200);
 
+  doc.getElementById("downloadProject").click();
+  for (let i = 0; i < 150 && !captured.length; i++) await sleep(200);
+  if (!captured.length) { console.error("no project zip captured; toast:", text("toast")); process.exit(1); }
+  fs.writeFileSync(path.join(OUT, "project.zip"), Buffer.from(await captured[0].arrayBuffer()));
+
   const report = {
     file: path.basename(DOCX),
     fileMeta: text("fileMeta"), qualityScore: text("qualityScore"),
@@ -101,10 +106,6 @@ const val = (id) => (doc.getElementById(id) || {}).value || "";
   fs.writeFileSync(path.join(OUT, "ui_report.json"), JSON.stringify(report, null, 2));
   fs.writeFileSync(path.join(OUT, "preview.html"), "<meta charset=utf-8>" + (doc.getElementById("previewStage") || {}).innerHTML);
 
-  doc.getElementById("downloadProject").click();
-  for (let i = 0; i < 150 && !captured.length; i++) await sleep(200);
-  if (!captured.length) { console.error("no project zip captured; toast:", text("toast")); process.exit(1); }
-  fs.writeFileSync(path.join(OUT, "project.zip"), Buffer.from(await captured[0].arrayBuffer()));
   console.log(JSON.stringify({ file: report.file, score: report.qualityScore, counts: report.counts, warnings: report.checks.filter((c) => c.startsWith("!")).length }));
   process.exit(0);
 })().catch((e) => { console.error(e); process.exit(1); });

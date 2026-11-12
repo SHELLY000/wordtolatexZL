@@ -694,7 +694,7 @@ ${rights.join("\n")}
     classifyImages(wrap);
     wrap.querySelectorAll("img.img-figure").forEach((img, i) => { if (!img.alt) img.alt = "Figure " + (i + 1); });
     const headings = [...wrap.querySelectorAll("h1,h2,h3,h4")];
-    const referencesHeading = headings.find((h) => REFERENCES_RE.test(h.textContent.trim()));
+    const referencesHeading = [...wrap.children].find(isReferenceHeading);
     if (referencesHeading) {
       let current = referencesHeading.nextElementSibling;
       while (current && !/^H[1-4]$/.test(current.tagName)) { current.classList.add("reference-entry"); current = current.nextElementSibling; }
@@ -717,8 +717,7 @@ ${rights.join("\n")}
       figures: wrap.querySelectorAll("img.img-figure").length,
       formulaImages: wrap.querySelectorAll("img.img-inline, img.img-display").length,
       tables: wrap.querySelectorAll("table").length,
-      references: referenceItems.length,
-      referenceItems
+      references: referenceItems.length
     };
   }
 
@@ -733,6 +732,7 @@ ${rights.join("\n")}
     return Math.min(3, numbered[1].split(".").length);
   }
   const REFERENCES_RE = /^(references?|bibliography|works cited|reference list|参考文献)\s*$/i;
+  const isReferenceHeading = (node) => /^H[1-6]$/.test(node.tagName) && REFERENCES_RE.test(stripNumber(node.textContent));
 
   const CAPTION_RE = /^(fig(?:ure)?\.?|图)\s*(\d+|[IVXLC]+)\b/i;
   const TABLE_CAPTION_RE = /^(table|tab\.|表)\s*(\d+|[IVXLC]+)\b/i;
@@ -812,18 +812,14 @@ ${rights.join("\n")}
   }
 
   function extractReferenceItems(heading) {
-    const items = [];
-    let node = heading.nextElementSibling;
-    while (node && !/^H[1-4]$/.test(node.tagName)) {
-      const listItems = [...node.querySelectorAll("li")].map((li) => li.textContent.replace(/\s+/g, " ").trim()).filter(Boolean);
-      if (listItems.length) items.push(...listItems);
-      else {
-        const text = node.textContent.replace(/\s+/g, " ").trim();
-        if (text) items.push(text);
-      }
-      node = node.nextElementSibling;
-    }
-    return items.map((text) => text.replace(/^\s*(?:\[?\d+\]?|\d+[.)])\s*/, "")).filter((text) => text.length > 5);
+    return collectSectionBody(heading).flatMap((node) => {
+      const listItems = [...node.querySelectorAll("li")];
+      return (listItems.length ? listItems : [node]).map((item) => {
+        const raw = item.textContent.replace(/\s+/g, " ").trim();
+        const prefix = /^(?:\[\s*(\d+)\s*\]|(\d+)[.)](?!\d))\s*/.exec(fullwidthToAscii(raw));
+        return { number: prefix ? Number(prefix[1] || prefix[2]) : null, text: prefix ? raw.slice(prefix[0].length) : raw };
+      });
+    }).filter(({ text }) => text.length > 5);
   }
 
   // single: the block is one paragraph (keywords, CCS). maxLength: never swallow the body when no heading follows.
@@ -1080,6 +1076,7 @@ ${rights.join("\n")}
     clearTimeout(contentEditTimer); contentEditTimer = null;
     const html = [...$("contentEditor").querySelectorAll(".content-block-value")].map((editor) => editor.innerHTML.trim()).filter(Boolean).join("\n");
     state.bodyHtml = cleanHtml(html);
+    state.citeStats = null;
     updatePreview();
   }
 
@@ -1347,12 +1344,20 @@ ${rights.join("\n")}
     state.headingMap = {};
     levels.forEach((tag, i) => { state.headingMap[tag] = ["section", "subsection", "subsubsection", "paragraph", "subparagraph"][Math.min(i, 4)]; });
     state.tableCounter = 0;
-    const bodyTex = linkCitations(nodeToLatex(parser), state.metadata.referenceItems || []);
+    const references = [];
+    for (const heading of [...parser.children].filter(isReferenceHeading)) {
+      heading.__referenceEntries = extractReferenceItems(heading);
+      for (const entry of heading.__referenceEntries) {
+        entry.key = "ref" + (references.length + 1);
+        references.push(entry);
+      }
+    }
+    const bodyTex = linkCitations(nodeToLatex(parser), references);
     return mergeIntoTemplate(state.templateText, meta, bodyTex.trim());
   }
 
   // Regions where "[3]" / "(Author, 2024)" must never be rewritten: math (\sqrt[3]{x}!), URLs, graphics, labels and existing \cite.
-  const CITE_PROTECT_RE = /\\\[[\s\S]*?\\\]|\\begin\{(equation\*?|align\*?|aligned|gather\*?|multline\*?)\}[\s\S]*?\\end\{\1\}|(?<!\\)\$(?:\\.|[^$\\\n])*\$|\\(?:url|href|includegraphics|label|ref|cite)(?:\[[^\]]*\])?\{[^}]*\}/g;
+  const CITE_PROTECT_RE = /\\\[[\s\S]*?\\\]|\\begin\{(equation\*?|align\*?|aligned|gather\*?|multline\*?|thebibliography)\}[\s\S]*?\\end\{\1\}|(?<!\\)\$(?:\\.|[^$\\\n])*\$|\\(?:url|href|includegraphics|label|ref|cite)(?:\[[^\]]*\])?\{[^}]*\}/g;
   function outsideProtected(tex, fn) {
     let out = "", last = 0;
     for (const m of tex.matchAll(CITE_PROTECT_RE)) { out += fn(tex.slice(last, m.index)) + m[0]; last = m.index + m[0].length; }
@@ -1362,18 +1367,30 @@ ${rights.join("\n")}
   // "[3]", "[2,5]", "[4-6]" and "(Author et al., 2024)" in the body become \cite{refN} when they match the reference list.
   function linkCitations(tex, items) {
     state.citeStats = { linked: 0, unlinked: 0 };
-    const split = tex.indexOf("\\begin{thebibliography}");
-    const body = split >= 0 ? tex.slice(0, split) : tex, tail = split >= 0 ? tex.slice(split) : "";
-    const n = items.length;
-    if (!n) return tex;
-    const index = items.map((text, i) => { const m = /^([A-Z][A-Za-z'’\-]+)/.exec(text.replace(/^\W+/, "")); const y = /\b(19|20)\d{2}[a-z]?\b/.exec(text); return { key: "ref" + (i + 1), surname: m ? m[1].toLowerCase() : "", year: y ? y[0] : "" }; });
-    const linkBrackets = (seg) => seg.replace(/\[(\d{1,3}(?:\s*[,，–-]\s*\d{1,3})*)\]/g, (m, inner) => {
+    const explicitNumbers = items.some(({ number }) => number !== null);
+    const numberKeys = new Map();
+    items.forEach(({ number, key }, i) => {
+      const label = explicitNumbers ? number : i + 1;
+      if (label !== null) numberKeys.set(label, numberKeys.has(label) ? null : key);
+    });
+    const index = items.map(({ text, key, number }) => {
+      const surname = /^([A-Z][A-Za-z'’\-]+)/.exec(text.replace(/^\W+/, ""));
+      const year = /\b(?:19|20)\d{2}[a-z]?\b/.exec(text);
+      return { key, surname: surname ? surname[1].toLowerCase() : "", year: year ? year[0] : "", ambiguousNumber: numberKeys.get(number) === null };
+    });
+    const unmatched = (text) => { state.citeStats.unlinked++; return text; };
+    // An en dash has already been escaped to LaTeX's double hyphen by texText.
+    const linkBrackets = (seg) => seg.replace(/\[\s*(\d+(?:\s*(?:[,，]|--?|–)\s*\d+)*)\s*\]/g, (m, inner) => {
       const keys = [];
       for (const part of inner.split(/\s*[,，]\s*/)) {
-        const range = /^(\d+)\s*[–-]\s*(\d+)$/.exec(part);
+        const range = /^(\d+)\s*(?:--?|–)\s*(\d+)$/.exec(part);
         const from = range ? Number(range[1]) : Number(part), to = range ? Number(range[2]) : Number(part);
-        if (!(from >= 1 && to >= from && to <= n && to - from < 20)) { state.citeStats.unlinked++; return m; }
-        for (let k = from; k <= to; k++) keys.push("ref" + k);
+        if (!(Number.isSafeInteger(from) && Number.isSafeInteger(to) && from >= 1 && to >= from && to - from < 20)) return unmatched(m);
+        for (let k = from; k <= to; k++) {
+          const key = numberKeys.get(k);
+          if (!key) return unmatched(m);
+          keys.push(key);
+        }
       }
       state.citeStats.linked++;
       return "\\cite{" + keys.join(",") + "}";
@@ -1385,13 +1402,13 @@ ${rights.join("\n")}
         const c = /^([A-Z][A-Za-z'’\-]+)(?:\s+et al\.?|\s*(?:\\&|&|and)\s+[A-Z][A-Za-z'’\-]+)?\s*,?\s*((?:19|20)\d{2}[a-z]?)$/.exec(cite.trim());
         if (!c) return m;
         const hits = index.filter((e) => e.surname === c[1].toLowerCase() && e.year === c[2]);
-        if (hits.length !== 1) { state.citeStats.unlinked++; return m; }
+        if (hits.length !== 1 || hits[0].ambiguousNumber) return unmatched(m);
         keys.push(hits[0].key);
       }
       state.citeStats.linked++;
       return "\\cite{" + keys.join(",") + "}";
     });
-    return outsideProtected(body, (seg) => linkParens(linkBrackets(seg))) + tail;
+    return outsideProtected(tex, (seg) => linkParens(linkBrackets(seg)));
   }
 
   function normalizeKeywords(value) { return String(value || "").split(/\s*[;；,，]\s*/).map((k) => k.trim()).filter(Boolean).join(", "); }
@@ -1450,7 +1467,7 @@ ${rights.join("\n")}
       if (/^h[1-6]$/.test(tag)) {
         if (inCell) return "\\textbf{" + inner().trim() + "}";
         const title = stripNumber(node.textContent);
-        if (REFERENCES_RE.test(title)) return bibliographyToLatex(node);
+        if (node.__referenceEntries) return bibliographyToLatex(node);
         if (/^(acknowledg(e)?ments?|致谢)$/i.test(title)) return acksToLatex(node);
         const cmd = state.headingMap[node.tagName] || "section";
         return (cmd === "section" ? "\n\\FloatBarrier" : "") + "\n\\" + cmd + "{" + texEscape(title) + "}\n";
@@ -1639,20 +1656,20 @@ ${rights.join("\n")}
     return nodes;
   }
 
-  // References become a thebibliography environment: numbering is automatic, so the "[1]" prefixes are dropped.
+  // Keep explicit source labels so the typeset bibliography agrees with the Word citations.
   function bibliographyToLatex(heading) {
-    const nodes = collectSectionBody(heading);
-    const items = [];
-    nodes.forEach((node) => {
-      node.__consumed = true;
-      const listItems = [...node.querySelectorAll("li")];
-      (listItems.length ? listItems : [node]).forEach((item) => {
-        const text = item.textContent.replace(/\s+/g, " ").trim().replace(/^\s*(?:\[\s*\d+\s*\]|\d+[.)])\s*/, "");
-        if (text.length > 5) items.push(text);
-      });
-    });
+    collectSectionBody(heading).forEach((node) => { node.__consumed = true; });
+    const items = heading.__referenceEntries;
     if (!items.length) return "\n\\section*{" + texEscape(stripNumber(heading.textContent)) + "}\n";
-    return "\n\\begin{thebibliography}{" + items.length + "}\n" + items.map((text, i) => "\\bibitem{ref" + (i + 1) + "} " + texText(text)).join("\n") + "\n\\end{thebibliography}\n";
+    const explicit = new Set(items.filter(({ number }) => number !== null).map(({ number }) => number));
+    let nextLabel = 1, widest = String(items.length);
+    const bibitems = items.map(({ text, key, number }) => {
+      while (explicit.has(nextLabel)) nextLabel++;
+      const label = number ?? nextLabel++;
+      if (String(label).length > widest.length) widest = String(label);
+      return "\\bibitem" + (explicit.size ? "[" + label + "]" : "") + "{" + key + "} " + texText(text);
+    });
+    return "\n\\begin{thebibliography}{" + widest + "}\n" + bibitems.join("\n") + "\n\\end{thebibliography}\n";
   }
 
   function acksToLatex(heading) {
@@ -1675,6 +1692,7 @@ ${rights.join("\n")}
       return;
     }
     zip.file(state.templateMainPath, buildLatex());
+    updateChecks();
     const mainDir = state.templateMainPath.includes("/") ? state.templateMainPath.slice(0, state.templateMainPath.lastIndexOf("/") + 1) : "";
     zip.file(mainDir + "WORD-CONVERSION-NOTES.txt", "Generated locally from Word with the bundled acmart v2.20 template.\nMain file: " + state.templateMainPath + "\nLayout: " + (conferenceFormat() === "manuscript" ? "manuscript (submission/review, line numbers)" : "acmsmall single-column proceedings (samples/acmsmall-conf.tex)") + "\n\nCOMPILE WITH XELATEX: run `latexmk main.tex` (the bundled latexmkrc selects XeLaTeX) or choose XeLaTeX in TeXstudio.\npdflatex fails on Unicode symbols; plain xelatex without libertine/newtxmath installed silently drops some glyphs, so install the full TeX Live scheme.\n\nReview before submission: equations (converted from Word, check the LaTeX), captions, citations (linked to the reference list where they matched), tables with merged cells (multirow), and the rights block.\n");
     zip.file(mainDir + "latexmkrc", "# Compile with XeLaTeX\n$pdf_mode = 5;\n$xelatex = 'xelatex -interaction=nonstopmode -synctex=1 %O %S';\n$clean_ext = 'synctex.gz';\n");

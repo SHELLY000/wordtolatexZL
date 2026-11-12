@@ -116,18 +116,11 @@ node scripts/headless_run.js galleytex_studio.html examples/sample_manuscript.do
 # 产生 out/ui_report.json  out/preview.html  out/project.zip
 ```
 
-看到 `out/project.zip` 就说明安装完成。装了 TeX Live 的话，`node scripts/regression.js examples/sample_manuscript.docx --compile` 会进一步编译项目并报告页数和 LaTeX 错误数（应为 0）。
+看到 `out/project.zip` 就说明安装完成。安装 XeLaTeX、`latexmk` 和 `pdfinfo` 后，运行 `npm run regression` 编译公开样例。成功时报告 `OK`、PDF 页数和零条 LaTeX 错误。
 
 ### 3.4 可选：本地自动编译
 
-`scripts/autocompile/` 里的脚本会监视一个文件夹，把每个导出的 ZIP 自动编译成真正的 PDF：
-
-| 平台 | 文件 | 用法 |
-|---|---|---|
-| Windows | `GalleyTeX-autocompile.bat` + `galleytex-autocompile.ps1` | 两个文件放在同一目录，双击 `.bat`；第一次确认要监视的文件夹（默认"下载"）。也可以把 ZIP 或文件夹拖到 `.bat` 上。 |
-| macOS / Linux | `galleytex-autocompile.sh` | `./galleytex-autocompile.sh`（监视 `~/Downloads`）或 `./galleytex-autocompile.sh 论文-LaTeX-Project.zip` |
-
-脚本把 ZIP 解压到纯 ASCII 路径的编译目录，运行 `latexmk -xelatex`，打开 PDF；失败时显示前几行错误并把完整日志存到 ZIP 旁边。需要本机有带 `xelatex`（最好也有 `latexmk`）的 TeX 发行版——TeXstudio 只是编辑器，它背后的 TeX Live / MiKTeX 才是编译器。
+使用[本机编译脚本](../scripts/autocompile/)处理自己导出或来源可信的 ZIP。可以指定 ZIP，或指定目录并在解压前逐个确认。脚本跳过 `latexmk` 初始化文件，关闭 shell escape，并在编译失败时保存诊断日志。
 
 ---
 
@@ -177,7 +170,7 @@ latexmk main.tex            # latexmkrc 已选择 XeLaTeX
 # 或：xelatex main.tex; xelatex main.tex
 ```
 
-TeXstudio / TeXworks：打开 `main.tex`，引擎选 **XeLaTeX**。如果自动编译脚本（§ 3.4）在运行，下载后几秒 PDF 会自己弹出来。
+TeXstudio / TeXworks：打开 `main.tex`，引擎选 **XeLaTeX**。如已启动目录监视脚本（§ 3.4），确认该 ZIP 后即可编译并打开 PDF。
 
 项目里的 `WORD-CONVERSION-NOTES.txt` 列出了投稿前要复核的内容：公式、图题、已关联的引用、`multirow` 表格和版权栏。
 
@@ -298,7 +291,7 @@ node scripts/regression.js submissions/ --compile --out build/ | tee submissions
 
 ### 7.11 编译出的 PDF 和预览不一样
 
-**这是正常的。** 浏览器预览只是为校对而做的 acmart 版式近似；换行、浮动体位置和页数以 XeLaTeX 为准。用自动编译脚本（§ 3.4）可以在每次导出后几秒内看到真实 PDF。
+**这是正常的。** 浏览器预览只是为校对而做的 acmart 版式近似；换行、浮动体位置和页数以 XeLaTeX 为准。导出后可编译项目以检查最终 PDF（§ 3.4）。
 
 ### 7.12 `pdflatex` 报 "Unicode character … not set up"
 

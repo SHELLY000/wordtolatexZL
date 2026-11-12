@@ -1,24 +1,14 @@
-﻿# GalleyTeX · Windows 本机自动编译脚本（监视下载目录，ZIP 落地即用 XeLaTeX 编译并打开 PDF）
+﻿# GalleyTeX · Windows 本机编译。仅编译自己导出或来源可信的 ZIP。
 # 用法：
-#   1) 双击 EI自动编译.bat —— 启动时确认/输入要监视的文件夹（记住上次的选择），之后工具每导出一个
-#      *-LaTeX-Project.zip 到该文件夹，就自动解压、pdfLaTeX 编译并打开 PDF；
-#   2) 把某个 *-LaTeX-Project.zip 拖到 EI自动编译.bat 上 —— 只编译这一个；
-#   3) 把一个文件夹拖到 EI自动编译.bat 上 —— 直接监视该文件夹。
+#   1) 双击 GalleyTeX-autocompile.bat，选择要监视的目录并逐个确认 ZIP；
+#   2) 将自己导出或来源可信的项目 ZIP 拖到 .bat 上，直接编译这个项目；
+#   3) 将文件夹拖到 .bat 上，监视该目录并逐个确认 ZIP。
 # 需要本机已安装 TeX Live 或 MiKTeX（需要 xelatex；有 latexmk 更好，没有也可以）。
 param([string]$Target = "")
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $ErrorActionPreference = "Continue"
 $Host.UI.RawUI.WindowTitle = "GalleyTeX 自动编译（XeLaTeX）"
-
-function Get-DownloadsFolder {
-    try {
-        $reg = Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" -ErrorAction Stop
-        $v = $reg."{374DE290-123F-4565-9164-39C4925E38B}"
-        if ($v) { return [Environment]::ExpandEnvironmentVariables($v) }
-    } catch { }
-    return (Join-Path $env:USERPROFILE "Downloads")
-}
 
 function Find-TexBinary([string]$name) {
     $cmd = Get-Command $name -ErrorAction SilentlyContinue
@@ -74,20 +64,19 @@ function Invoke-Compile([string]$zipPath) {
     if (-not $paperName) { $paperName = $zipName }
     $ascii = ($zipName -replace '[^A-Za-z0-9_-]', '_').Trim('_')
     if (-not $ascii) { $ascii = "paper" }
-    $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
-    # 编译目录用纯 ASCII 路径（C:\Users\Public\galleytex-build），避免中文路径让 TeX 出问题
-    $buildRoot = Join-Path $env:PUBLIC "galleytex-build"
-    $dir = Join-Path $buildRoot ($stamp + "-" + $ascii)
-    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    # 每次使用新的工程目录，避免把上一轮的日志和 PDF 当作本次输出。
+    $buildRoot = Join-Path ([System.IO.Path]::GetTempPath()) "galleytex-build"
+    $dir = Join-Path $buildRoot ($ascii + "-" + [Guid]::NewGuid().ToString("N"))
     try {
-        Expand-Archive -LiteralPath $zipPath -DestinationPath $dir -Force
+        New-Item -ItemType Directory -Force -Path $dir -ErrorAction Stop | Out-Null
+        Expand-Archive -LiteralPath $zipPath -DestinationPath $dir -ErrorAction Stop
     } catch {
         Write-Host ("    解压失败：" + $_.Exception.Message) -ForegroundColor Red
-        return
+        return $false
     }
     if (-not (Test-Path (Join-Path $dir "main.tex"))) {
         Write-Host "    ZIP 里没有 main.tex，跳过。" -ForegroundColor Yellow
-        return
+        return $false
     }
     $layout = "未知版式"
     $head = Get-Content (Join-Path $dir "main.tex") -TotalCount 6 -Encoding UTF8
@@ -107,15 +96,15 @@ function Invoke-Compile([string]$zipPath) {
             $pass++
             if ($script:Engine.Kind -eq "latexmk") {
                 Write-Host "    latexmk -xelatex …"
-                $null = & $script:Engine.Path -xelatex -interaction=nonstopmode -file-line-error main.tex 2>&1
+                $buildOutput = & $script:Engine.Path -norc -xelatex -no-shell-escape -halt-on-error -interaction=nonstopmode -file-line-error main.tex 2>&1
             } else {
                 Write-Host ("    " + $script:Engine.Kind + " 第 " + $pass + " 遍…")
-                $null = & $script:Engine.Path -interaction=nonstopmode -file-line-error main.tex 2>&1
+                $buildOutput = & $script:Engine.Path -no-shell-escape -halt-on-error -interaction=nonstopmode -file-line-error main.tex 2>&1
             }
             $code = $LASTEXITCODE
             $log = ""
             if (Test-Path "main.log") { $log = [System.IO.File]::ReadAllText((Join-Path $dir "main.log")) }
-            if ($code -ne 0 -or -not (Test-Path "main.pdf")) {
+            if ($code -ne 0 -or $log -match '(?m)^!' -or -not (Test-Path "main.pdf") -or (Get-Item "main.pdf").Length -eq 0) {
                 Write-Host "    编译出错：" -ForegroundColor Red
                 $errs = ($log -split "`r?`n") | Where-Object { $_ -match '^(!|main\.tex:\d+:)' } | Select-Object -First 8
                 foreach ($e in $errs) { Write-Host ("      " + $e) -ForegroundColor Red }
@@ -123,11 +112,11 @@ function Invoke-Compile([string]$zipPath) {
                     Write-Host "    提示：项目需要 XeLaTeX（中文或 Unicode 符号）。请在 TeX Live/MiKTeX 中安装 xelatex 后重试。" -ForegroundColor Yellow
                 }
                 $logCopy = Join-Path (Split-Path -Parent $zipPath) ($paperName + "-编译日志.log")
-                Copy-Item "main.log" $logCopy -Force
+                if ($log) { Copy-Item "main.log" $logCopy -Force }
+                else { $buildOutput | Set-Content -LiteralPath $logCopy -Encoding UTF8 }
                 Write-Host ("    完整日志：" + $logCopy)
-                Start-Process notepad.exe $logCopy
                 [Console]::Beep(800, 300)
-                return
+                return $false
             }
             $again = ($log -match 'Rerun to get|Label\(s\) may have changed|There were undefined references')
             if ($log -match 'Output written on main\.(pdf|xdv) \((\d+) pages?') { $pages = $Matches[1] }
@@ -138,11 +127,12 @@ function Invoke-Compile([string]$zipPath) {
     }
     if ($ok) {
         $pdfOut = Join-Path (Split-Path -Parent $zipPath) ($paperName + "-" + ($layout -replace '\s.*$', '') + ".pdf")
-        Copy-Item (Join-Path $dir "main.pdf") $pdfOut -Force
+        Copy-Item -LiteralPath (Join-Path $dir "main.pdf") -Destination $pdfOut -Force -ErrorAction Stop
         Write-Host ("    完成：" + $pages + " 页 → " + $pdfOut) -ForegroundColor Green
         Write-Host ("    工程目录：" + $dir)
         Start-Process $pdfOut
     }
+    return $ok
 }
 
 # ---------------------------------------------------------------------------
@@ -156,9 +146,8 @@ Write-Host ("使用 " + $script:Engine.Kind + "：" + $script:Engine.Path)
 if ($script:Engine.Kind -eq "pdflatex") { Write-Host "警告：只找到 pdflatex。含中文或 Unicode 符号的稿件会编译失败，建议安装 xelatex。" -ForegroundColor Yellow }
 
 if ($Target -and (Test-Path -LiteralPath $Target) -and $Target -match '\.zip$') {
-    Invoke-Compile (Resolve-Path -LiteralPath $Target).Path
-    Read-Host "按回车键关闭"
-    exit 0
+    if (Invoke-Compile (Resolve-Path -LiteralPath $Target).Path) { exit 0 }
+    exit 1
 }
 
 # ---- 选择要监视的文件夹：上次的选择保存在脚本旁边的 galleytex-autocompile.cfg 里 ----
@@ -188,14 +177,15 @@ if ($Target -and (Test-Path -LiteralPath $Target -PathType Container)) {
     $watchDir = (Resolve-Path -LiteralPath $Target).Path
 } else {
     $watchDir = Read-SavedDir
-    if (-not $watchDir -or -not (Test-Path -LiteralPath $watchDir)) { $watchDir = Get-DownloadsFolder }
     while ($true) {
         Write-Host ""
         Write-Host ("监视目录：" + $watchDir) -ForegroundColor Cyan
-        Write-Host "  直接回车 = 用这个目录；输入其他路径回车 = 改用该路径；输入 s 回车 = 打开文件夹选择框"
-        $ans = Read-Host "请选择"
-        $ans = $ans.Trim().Trim('"')
-        if (-not $ans) { break }
+        Write-Host "  输入目录路径，或输入 s 打开文件夹选择框。已有监视目录时可回车确认。"
+        $ans = ([string](Read-Host "请选择")).Trim().Trim('"')
+        if (-not $ans) {
+            if ($watchDir -and (Test-Path -LiteralPath $watchDir -PathType Container)) { break }
+            continue
+        }
         if ($ans -eq "s" -or $ans -eq "S") {
             $picked = Select-DirDialog $watchDir
             if ($picked) { $watchDir = $picked }
@@ -216,7 +206,7 @@ $Host.UI.RawUI.WindowTitle = "GalleyTeX 自动编译 · 监视 " + $watchDir
 $seen = @{}
 Get-ChildItem -LiteralPath $watchDir -Filter "*-LaTeX-Project*.zip" -File -ErrorAction SilentlyContinue | ForEach-Object { $seen[$_.FullName] = $_.LastWriteTimeUtc.Ticks }
 Write-Host ("正在监视 " + $watchDir)
-Write-Host "在排版工具里点“下载完整 LaTeX 项目压缩包”，ZIP 一落地就会自动编译并打开 PDF。按 Ctrl+C 退出。"
+Write-Host "检测到项目 ZIP 后，请逐个确认来源。按 Ctrl+C 退出。"
 
 while ($true) {
     Start-Sleep -Seconds 2
@@ -226,7 +216,8 @@ while ($true) {
         if ($seen.ContainsKey($key) -and $seen[$key] -eq $f.LastWriteTimeUtc.Ticks) { continue }
         if (-not (Wait-ForStable $key)) { continue }
         $seen[$key] = (Get-Item -LiteralPath $key).LastWriteTimeUtc.Ticks
-        Invoke-Compile $key
+        $answer = Read-Host ("编译这个可信 ZIP？[y/N] " + $key)
+        if ($answer -eq "y") { $null = Invoke-Compile $key }
         Write-Host ""
         Write-Host "继续监视中…（Ctrl+C 退出）"
     }

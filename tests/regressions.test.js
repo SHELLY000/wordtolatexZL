@@ -5,7 +5,7 @@ const assert = require("node:assert/strict");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const { execFileSync } = require("child_process");
+const { execFileSync, spawnSync } = require("child_process");
 const NodeZip = require("jszip");
 
 const root = path.join(__dirname, "..");
@@ -34,6 +34,7 @@ const body = [
   p("Keywords: converter; latex; test"),
   p("1 Introduction", "Heading1"),
   p("Prior work [1] and [2,3] showed the path C:\\path\\file matters, see also [4]."),
+  p("Range [1–3]. Missing [5]. Author match (Jones, 2021). Ambiguous label (Wu, 2023)."),
   '<w:p><w:r><w:t xml:space="preserve">The cube root </w:t></w:r>' + cuberoot + '<w:r><w:t xml:space="preserve"> is inline.</w:t></w:r></w:p>',
   numbered,
   mixed,
@@ -46,11 +47,13 @@ const body = [
   p("Fig. 1. The same picture again as a figure."),
   "<w:p>" + drawing(3) + "</w:p>",
   p("Fig. 2. And a third copy."),
-  p("References", "Heading1"),
-  p("[1] Smith, A. 2020. First paper. Journal."),
-  p("[2] Jones, B. 2021. Second paper. Journal."),
+  p("3 References", "Heading1"),
   p("[3] Lee, C. 2022. Third paper. Journal."),
+  p("[1] Smith, A. 2020. First paper. Journal."),
+  p("2.Jones, B. 2021. Second paper. Journal."),
   p("[4] Wu, D. 2023. Fourth paper. Journal."),
+  p("[4] Roe, E. 2024. Another fourth paper. Journal."),
+  p("Doe, F. 2025. Unnumbered paper. Journal."),
 ].join("");
 
 async function makeDocx(file) {
@@ -79,7 +82,13 @@ test("regressions: escaping, citation linking, equation numbers, table images, f
   // citation linking must not touch math
   assert.match(tex, /\$\\sqrt\[3\]\{x\}\$/);
   assert.doesNotMatch(tex, /\\sqrt\\cite/);
-  assert.match(tex, /\\cite\{ref2,ref3\}/);
+  assert.match(tex, /Prior work \\cite\{ref2\} and \\cite\{ref3,ref1\}/);
+  assert.match(tex, /\\bibitem\[1\]\{ref2\} Smith/);
+  assert.match(tex, /\\bibitem\[2\]\{ref3\} Jones/);
+  assert.match(tex, /Range \\cite\{ref2,ref3,ref1\}\. Missing \[5\]\. Author match \\cite\{ref3\}\./);
+  assert.match(tex, /see also \[4\]/);
+  assert.match(tex, /Ambiguous label \(Wu, 2023\)/);
+  assert.ok(report.checks.some((c) => /^! 3 in-text citations could not be matched uniquely/.test(c)));
   // plain text run inside a formula is escaped
   assert.match(tex, /\\text\{x\\_max \\%\}/);
   // the split "(1)" is gone from the review block (it was shown twice: literal + \tag)
@@ -101,4 +110,16 @@ test("regressions: escaping, citation linking, equation numbers, table images, f
   assert.match(tex, /Line break before this text\./);
   assert.match(tex, /\{\\begin\{tabular\}\{.*\\textbf\{Nested cell heading\} & \\textbf\{Nested header second line\}.*\\end\{tabular\}\} Text after nested table\./);
   assert.doesNotMatch(tex, /\\(?:sub)*section\{Nested cell heading\}/);
+});
+
+test("regression runner fails explicitly when latexmk is unavailable", () => {
+  const out = path.join(tmp, "missing-latexmk");
+  const emptyPath = path.join(tmp, "empty-path");
+  fs.mkdirSync(emptyPath);
+  const result = spawnSync(process.execPath, [path.join(root, "scripts", "regression.js"), "--compile", "--out", out], {
+    cwd: emptyPath, encoding: "utf8", env: { ...process.env, PATH: emptyPath }, timeout: 90000
+  });
+  assert.equal(result.status, 1, result.stderr);
+  assert.match(result.stdout, /^sample_manuscript\.docx,,,.*LATEXMK_NOT_FOUND$/m);
+  assert.ok(!fs.existsSync(path.join(out, "sample_manuscript", "proj", "main.pdf")));
 });
