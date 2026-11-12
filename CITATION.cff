@@ -2,13 +2,12 @@ cff-version: 1.2.0
 message: "If you use this software, please cite both the software and the paper below."
 title: "GalleyTeX: Word-to-LaTeX manuscript typesetting with author-in-the-loop proofreading"
 abstract: >-
-  GalleyTeX converts Word (.docx) manuscripts into compilable LaTeX projects for
+  GalleyTeX converts Word (.docx) manuscripts into LaTeX projects for
   journal and conference submission systems. It converts Word equations (OMML)
   to LaTeX, maps template heading styles and manually formatted headings to
   section levels, renders merged table cells, links in-text citations to the
-  reference list, and degrades unconvertible content (legacy equation-editor
-  objects, native charts, metafile images) to visible placeholders so that the
-  exported project always compiles. A single-file offline web application lets
+  reference list, and uses visible placeholders for unconvertible content
+  (legacy equation-editor objects, native charts, metafile images). A single-file offline web application lets
   authors who do not know LaTeX proofread and correct every recognised block,
   including equations, before the project is handed to the editorial office.
 type: software

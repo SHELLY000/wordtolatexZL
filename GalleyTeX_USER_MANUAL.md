@@ -31,7 +31,7 @@ GalleyTeX turns a Word manuscript into a LaTeX project that compiles, and lets t
 
 Editorial offices caught between the two either re-key manuscripts or run a converter and hand-fix its output. Existing converters (Pandoc, Writer2LaTeX, commercial add-ins) stop at a `.tex` file: they do not target a venue template, do not tell the author what was lost, and give a non-LaTeX author nothing they can correct.
 
-GalleyTeX closes that loop. Conversion runs entirely in the browser. Every recognised block — headings, paragraphs, **equations as editable LaTeX**, tables, figures, references — is shown next to a template-formatted preview; the author fixes what the converter got wrong through ordinary text editing and a block-type drop-down; a checklist names what still needs attention; and the exported project **always compiles**, because anything GalleyTeX cannot convert (legacy equation-editor objects, native Word charts, metafile images) becomes a visible placeholder at the right position instead of a build error.
+GalleyTeX closes that loop. Conversion runs entirely in the browser. Every recognised block — headings, paragraphs, **equations as editable LaTeX**, tables, figures, references — is shown next to a template-formatted preview; the author fixes what the converter got wrong through ordinary text editing and a block-type drop-down; a checklist names what still needs attention; and the exported project marks unsupported objects with visible placeholders. Compile the project with XeLaTeX to verify the result.
 
 ### 1.2 Key Features
 
@@ -42,7 +42,7 @@ GalleyTeX closes that loop. Conversion runs entirely in the browser. Every recog
 - **Tables** — merged cells become `\multirow` / `\multicolumn` with `\cline`; ragged-right `X` columns; tables longer than 18 rows are emitted as `xltabular` so they break across pages; images inside cells are kept
 - **Figures and float control** — `figure` environments with `\caption`, `\Description` and `\label`; `[!htbp]` with relaxed float parameters and a `\FloatBarrier` before every section, or a strict "keep the Word position" (`[H]`) mode
 - **Citation linking** — `[3]`, `[2, 5]`, `[4–6]` and `(Author et al., 2024)` become `\cite{refN}` when they match the recognised reference list; the list becomes `thebibliography`
-- **Always compiles** — WMF/EMF images, Equation Editor 3.0 / MathType OLE objects and native charts become placeholder boxes; `xeCJK` is loaded only when installed; a missing country is inferred from the e-mail domain; over-long metadata fields are capped
+- **Conversion warnings** — WMF/EMF images, Equation Editor 3.0 / MathType OLE objects and native charts become placeholder boxes; `xeCJK` is loaded only when installed; a missing country is inferred from the e-mail domain; over-long metadata fields are capped
 - **Venue settings that persist** — conference name, dates, ISBN, `\setcopyright` choice and template variant are entered once and remembered in the browser (and can be exported / imported as JSON)
 - **Zero-install browser front end** — `galleytex_studio.html`, one 1.6 MB file that runs offline with no server, no upload and no network access
 - **Bilingual interface** — English by default, Simplified Chinese with one click; the choice is remembered, and manuscript recognition understands both languages regardless of the interface language
@@ -148,18 +148,11 @@ node scripts/headless_run.js galleytex_studio.html examples/sample_manuscript.do
 # out/ui_report.json  out/preview.html  out/project.zip
 ```
 
-If `out/project.zip` is produced, the installation is complete. With TeX Live installed, `node scripts/regression.js examples/sample_manuscript.docx --compile` additionally compiles the project and reports the page count and the number of LaTeX errors (expected: 0).
+If `out/project.zip` is produced, the installation is complete. With XeLaTeX, `latexmk` and `pdfinfo` installed, `npm run regression` also checks the compiled PDF. A successful row reports `OK`, a positive page count and zero LaTeX errors.
 
 ### 3.4 Optional: Local Auto-Compile
 
-`scripts/autocompile/` contains folder watchers that turn every exported ZIP into a real PDF:
-
-| Platform | Files | Usage |
-|---|---|---|
-| Windows | `GalleyTeX-autocompile.bat` + `galleytex-autocompile.ps1` | Keep both in one folder, double-click the `.bat`; confirm the watched folder once (default *Downloads*). A ZIP or folder can also be dropped onto the `.bat`. |
-| macOS / Linux | `galleytex-autocompile.sh` | `./galleytex-autocompile.sh` (watches `~/Downloads`) or `./galleytex-autocompile.sh paper-LaTeX-Project.zip` |
-
-The watcher unpacks the ZIP into an ASCII-only build directory, runs `latexmk -xelatex`, opens the PDF, and on failure shows the first error lines and saves the full log next to the ZIP. Requires a TeX distribution with `xelatex` (and preferably `latexmk`).
+Use the [local compilation helpers](scripts/autocompile/) to compile a trusted project ZIP. Select the ZIP directly, or choose a folder and approve each archive before extraction. The helpers skip `latexmk` initialization files, disable shell escape, and save a diagnostic log if compilation fails.
 
 ---
 
@@ -419,7 +412,7 @@ latexmk main.tex            # latexmkrc selects XeLaTeX
 # or: xelatex main.tex; xelatex main.tex
 ```
 
-TeXstudio / TeXworks: open `main.tex` and select **XeLaTeX** as the engine. With the auto-compile watcher (§ 3.4) running, the PDF opens by itself a few seconds after the download.
+TeXstudio / TeXworks: open `main.tex` and select **XeLaTeX** as the engine. With the folder watcher (§ 3.4) running, approve the project ZIP to compile and open the PDF.
 
 `WORD-CONVERSION-NOTES.txt` inside the project lists what to review before submission: equations, captions, linked citations, `multirow` tables and the rights block.
 
@@ -603,7 +596,7 @@ A fourth CI job installs TeX Live, compiles the example project with XeLaTeX and
 
 ### 9.11 The Compiled PDF Differs From the Preview
 
-**Expected.** The browser preview approximates acmart's layout for proofreading; line breaks, float placement and page count come from XeLaTeX. Use the auto-compile watcher (§ 3.4) to see the real PDF within seconds of each export.
+**Expected.** The browser preview approximates acmart's layout for proofreading; line breaks, float placement and page count come from XeLaTeX. Compile the exported project to verify the final PDF (§ 3.4).
 
 ### 9.12 `pdflatex` Fails With "Unicode character … not set up"
 

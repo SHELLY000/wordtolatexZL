@@ -18,9 +18,9 @@ tell the author what was lost, and give a non-LaTeX author nothing they can corr
 GalleyTeX closes that loop. It converts the manuscript in the browser, shows the author every
 recognised block — headings, paragraphs, **equations as editable LaTeX**, tables, figures,
 references — next to a template-formatted preview, lets them fix what the converter got wrong
-without knowing LaTeX, and exports a project that **always compiles**: content it cannot
-convert (legacy equation-editor objects, native Word charts, metafile images) becomes a
-visible placeholder at the right position instead of a build error.
+and exports a LaTeX project. It places visible placeholders where it cannot convert legacy
+equation-editor objects, native Word charts, or metafile images. Review the checklist and
+compile the exported project with XeLaTeX to verify the result.
 
 ## Two ways to run it
 
@@ -61,11 +61,10 @@ in the header changes it to Simplified Chinese.
 4. Export the LaTeX project (`main.tex` + template + figures) and compile it with
    `latexmk main.tex` (XeLaTeX), or hand the ZIP to the editorial office.
 
-**Local auto-compile.** `scripts/autocompile/` contains a Windows (`.bat` + PowerShell) and a
-macOS/Linux (`.sh`) watcher: start it once, and every project ZIP the app saves to your
-Downloads folder is unpacked, compiled with XeLaTeX and opened as a PDF — the real LaTeX
-output, not the browser preview — with errors and the full log shown when compilation fails.
-Requires TeX Live / MiKTeX / MacTeX with `xelatex`.
+**Local compilation.** The [compilation helpers](scripts/autocompile/) accept a project ZIP you
+trust or a folder to watch. In folder mode, confirm the source of each ZIP before the helper
+extracts and compiles it. The helpers run XeLaTeX with shell escape disabled and ignore
+`latexmk` initialization files. They open the PDF on success and save the build log on failure.
 
 Headless:
 
@@ -75,6 +74,11 @@ node scripts/headless_run.js galleytex_studio.html examples/sample_manuscript.do
 #   out/project.zip     the LaTeX project
 node scripts/regression.js my_manuscripts/ --compile      # one CSV line per manuscript
 ```
+
+`npm run regression` runs the public example. For `--compile`, install `latexmk`, XeLaTeX
+and `pdfinfo` (included in Poppler). The runner reports `OK` only when `latexmk` exits
+successfully, the TeX log has no errors, and `pdfinfo` reads a positive page count. Any
+failed row makes the command exit nonzero after the batch.
 
 ## How it works
 
@@ -101,7 +105,7 @@ node scripts/regression.js my_manuscripts/ --compile      # one CSV line per man
 | Review UI | `src/app.js` → `renderContentEditor`, `retagBlock`, `renderMathIn`; `src/i18n.js` | block-by-block editing, type drop-down, KaTeX rendering with error marking; English / Chinese interface strings |
 | LaTeX generation | `src/app.js` → `buildLatex`, `nodeToLatex`, `tableToLatex`, `imageToLatex`, `linkCitations` | acmart project with `multirow` tables, `xltabular` long tables, float control, `\cite` linking, placeholders |
 | Build & test | `scripts/build.js`, `scripts/headless_run.js`, `scripts/regression.js`, `tests/` | single-file bundle, jsdom runner, regression CSV, unit/pipeline tests |
-| Local auto-compile | `scripts/autocompile/` | folder watchers (Windows PowerShell, macOS/Linux shell) that compile every exported ZIP with XeLaTeX and open the PDF |
+| Local compilation | `scripts/autocompile/` | XeLaTeX helpers for explicitly selected ZIPs or individually approved files in a watched folder |
 
 ## Validation
 

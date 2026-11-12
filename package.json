@@ -9,7 +9,7 @@
   "scripts": {
     "build": "node scripts/build.js",
     "test": "node --test",
-    "regression": "node scripts/regression.js tests/fixtures --compile",
+    "regression": "node scripts/regression.js --compile",
     "run": "node scripts/headless_run.js"
   },
   "engines": { "node": ">=18" },

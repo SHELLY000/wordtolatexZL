@@ -7,6 +7,11 @@ latest version and therefore does not change from release to release.
 ## Unreleased
 
 ### Fixed
+- Link numeric citations by their source labels, including citation ranges with en dashes.
+  Leave missing or ambiguous matches as text and report them in the proofreading checklist.
+- Require a successful XeLaTeX run and a readable PDF in the regression runner. The local
+  compilation helpers require confirmation in folder mode, skip `latexmk` initialization
+  files, and disable shell escape.
 - Ignore leading manual line breaks that have no LaTeX line to end. Inside table cells, render
   headings as inline text, use wrapping for manual breaks, and keep nested tables inline.
 - Render Unicode subscript and superscript runs in Word equations with grouped LaTeX indices,
