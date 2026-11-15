@@ -36,13 +36,14 @@ GalleyTeX closes that loop. Conversion runs entirely in the browser. Every recog
 ### 1.2 Key Features
 
 - **Word equations (OMML) → LaTeX** — fractions, sub/superscripts, pre-scripts, radicals, n-ary operators with limits, delimiters, matrices, accents, over/underlines, braces, functions, equation arrays; upright / bold / blackboard / script / fraktur runs; equations are put back at their exact position, including inside table cells, and numbered equations keep the author's number via `\tag`
+- **Legacy WPS equations → LaTeX** — imports supported MTEF v3 records from embedded Equation.KSEE3 objects.
 - **Equation proofreading** — every equation is shown as editable LaTeX source and rendered live with a bundled KaTeX; syntax errors are highlighted and counted
 - **Heading recovery from any template** — paragraph styles are mapped to heading levels through `outlineLvl` / `basedOn` in `styles.xml` (built-in *Heading 1–3*, ACM *Head1–3*, Springer, IEEE …); manually bolded headings (`2.1 …`, `I. …`, `A. …`, *Introduction*, *References*) are promoted with a conservative rule and flagged for confirmation
 - **Front matter** — title, authors, affiliations, e-mails, ORCID iDs, corresponding-author markers, abstract, keywords and CCS concepts are recognised, including journal templates that put the masthead or the abstract box in a table
 - **Tables** — merged cells become `\multirow` / `\multicolumn` with `\cline`; ragged-right `X` columns; tables longer than 18 rows are emitted as `xltabular` so they break across pages; images inside cells are kept
 - **Figures and float control** — `figure` environments with `\caption`, `\Description` and `\label`; `[!htbp]` with relaxed float parameters and a `\FloatBarrier` before every section, or a strict "keep the Word position" (`[H]`) mode
 - **Citation linking** — `[3]`, `[2, 5]`, `[4–6]` and `(Author et al., 2024)` become `\cite{refN}` when they match the recognised reference list; the list becomes `thebibliography`
-- **Conversion warnings** — WMF/EMF images, Equation Editor 3.0 / MathType OLE objects and native charts become placeholder boxes; `xeCJK` is loaded only when installed; a missing country is inferred from the e-mail domain; over-long metadata fields are capped
+- **Conversion warnings** — unsupported image formats and native charts can appear as placeholder boxes, and unconverted OLE objects are flagged; `xeCJK` is loaded only when installed; a missing country is inferred from the e-mail domain; over-long metadata fields are capped
 - **Venue settings that persist** — conference name, dates, ISBN, `\setcopyright` choice and template variant are entered once and remembered in the browser (and can be exported / imported as JSON)
 - **Zero-install browser front end** — `galleytex_studio.html`, one 1.6 MB file that runs offline with no server, no upload and no network access
 - **Bilingual interface** — English by default, Simplified Chinese with one click; the choice is remembered, and manuscript recognition understands both languages regardless of the interface language
@@ -196,7 +197,8 @@ Before mammoth sees the file, `preprocessDocx` opens the `.docx` with JSZip and 
 
 - every `<m:oMath>` is converted and replaced by a placeholder (§ 4.1)
 - every native chart / SmartArt drawing (`<c:chart>`, `<dgm:relIds>`) becomes a `\uE000CHARTn\uE000` placeholder
-- legacy OLE objects (`<w:object>`, i.e. Equation Editor 3.0 / MathType / WPS formulas) are counted
+- supported WPS legacy formulas are read from the embedded Equation Native stream and inserted at their original positions
+- unconverted OLE objects are counted and retain any available previews
 
 `styleMapFromStyles` reads `word/styles.xml` and maps every paragraph style that carries an outline level — directly or through the `basedOn` chain — to a heading tag (`h1`…`h6`), every style whose name contains *Caption* (or its Chinese equivalent) to `figcaption`, and every *Title*-like style to the paper title. This is what makes ACM's `Head1`/`Head2`/`Head3`, Springer's and IEEE's heading styles work without configuration.
 
@@ -245,7 +247,7 @@ Before mammoth sees the file, `preprocessDocx` opens the `.docx` with JSZip and 
 | Citations | `[n]`, `[a, b]`, `[a–b]` and `(Surname, 2024)` / `(Surname et al., 2024; Other and Third, 2023)` → `\cite{refN}` when the number is within range or surname + year match exactly one entry; never applied inside math, `\url`, `\includegraphics`, `\label`, `\ref`, `\cite` |
 | Placeholders | `\fbox{\parbox{0.85\linewidth}{…}}` for WMF/EMF/GIF/BMP/TIFF/SVG images, native charts and OLE objects, with the caption if one was found |
 
-Preamble (from `fixedTemplate`): `\documentclass[acmsmall]{acmart}` (final, single column) or `[manuscript,screen,review]` (submission with line numbers); `tabularx`, `multirow`, `xltabular`, `placeins`, `float`; relaxed float parameters; conditional `xeCJK` with font fallback; `\setcopyright`, `\copyrightyear`, `\acmYear`, `\acmDOI`, `\acmConference[short]{name}{dates}{location}`, `\acmISBN`, optional `\settopmatter{printfolios=true}`; `\title[short]{…}` with an automatic short title above 55 characters; `\author` / `\affiliation{\institution \city \country}` / `\email` / `\orcid` / `\correspondingauthor`; `\begin{abstract}`, `\ccsdesc`, `\keywords`, `\maketitle`.
+Preamble (from `fixedTemplate`): `\documentclass[acmsmall]{acmart}` (single-column final), `[sigconf]` (two-column final), or `[manuscript,screen,review]` (single-column submission with line numbers); `tabularx`, `multirow`, `xltabular`, `placeins`, `float`; relaxed float parameters; conditional `xeCJK` with font fallback; `\setcopyright`, `\copyrightyear`, `\acmYear`, `\acmDOI`, `\acmConference[short]{name}{dates}{location}`, `\acmISBN`, optional `\settopmatter{printfolios=true}`; `\title[short]{…}` with an automatic short title above 55 characters; `\author` / `\affiliation{\institution \city \country}` / `\email` / `\orcid` / `\correspondingauthor`; `\begin{abstract}`, `\ccsdesc`, `\keywords`, `\maketitle`.
 
 ### 4.6 Export
 
@@ -372,7 +374,7 @@ The interface opens in English; the two-button language switch in the page heade
 
 ### 6.1 Step 1 — Import
 
-1. **Venue details** — fill in once: full conference name, short name (e.g. `GAITDI 2026`), year, dates (`June 03--05, 2026`), location, ISBN, template variant (*acmsmall* — final single-column proceedings — or *manuscript* — submission version with line numbers), `\setcopyright` value (`acmlicensed`, `acmcopyright`, `rightsretained`, `cc`, `none`) and whether page numbers are printed in the final version (`printfolios=true`). Values are saved automatically as you type; **Save now** saves explicitly, **Restore defaults** resets the form, and **Download venue settings** / **Import venue settings** export or import the settings as a JSON file — for machines where browser storage is blocked, or for sharing one configuration across an editorial team.
+1. **Venue details** — fill in once: full conference name, short name (e.g. `GAITDI 2026`), year, dates (`June 03--05, 2026`), location, ISBN, `\setcopyright` value (`acmlicensed`, `acmcopyright`, `rightsretained`, `cc`, `none`) and whether page numbers are printed in the final version (`printfolios=true`). Values are saved automatically as you type; **Save now** saves explicitly, **Restore defaults** resets the form, and **Download venue settings** / **Import venue settings** export or import the settings as a JSON file — for machines where browser storage is blocked, or for sharing one configuration across an editorial team.
 2. **Upload the Word document** — drop or choose the `.docx` (at most 30 MB). Recognition takes a few seconds; the file card then shows the size and word count and a toast confirms that recognition finished.
 3. Click **Recognise and proofread**.
 
@@ -416,10 +418,12 @@ TeXstudio / TeXworks: open `main.tex` and select **XeLaTeX** as the engine. With
 
 `WORD-CONVERSION-NOTES.txt` inside the project lists what to review before submission: equations, captions, linked citations, `multirow` tables and the rights block.
 
+Use **Document layout** at the top of the controls to switch between single- and two-column layouts for the manuscript preview, browser PDF and LaTeX project.
+
 ### 6.5 Writing the Word Manuscript for Best Results
 
 1. Use Word's built-in *Heading 1 / 2 / 3* styles or the venue template's heading styles; do not merely bold a line.
-2. Insert equations with *Insert → Equation* (OMML). Equation Editor 3.0, MathType and WPS formulas are OLE pictures and cannot be converted.
+2. Insert new equations with *Insert → Equation* (OMML). Supported WPS Equation.KSEE3 formulas in existing manuscripts can also be imported as editable LaTeX.
 3. Paste charts as PNG; native Word charts contain no bitmap.
 4. Write captions as `Figure 1: …` / `Table 1: …` immediately next to the figure or table.
 5. Label the front matter: `Abstract:`, `Keywords:`, and put each author's name, affiliation and e-mail on their own lines.
@@ -522,7 +526,7 @@ A fourth CI job installs TeX Live, compiles the example project with XeLaTeX and
 ### 8.4 Scope and Limitations
 
 - The bundled template is ACM `acmart`. The body generator is template-agnostic, but the front-matter macros (`\acmConference`, `\affiliation`, `\ccsdesc`, `acks`) are ACM's; other venues need a template module.
-- Equation Editor 3.0 / MathType / WPS formulas are OLE pictures, not OMML: exported as placeholders (an MTEF parser or server-side WMF rendering is planned).
+- Legacy WPS equation support covers Equation.KSEE3 objects with supported MTEF v3 records. Other embedded equation formats and unsupported records retain their available previews.
 - Native Word charts and SmartArt contain no bitmap: placeholders.
 - References are exported as `thebibliography` in the author's own formatting; the bundled `ACM-Reference-Format.bst` is not applied automatically.
 - Heading promotion from bold text and the paragraph-level title / abstract / keywords recognition are heuristics; the checklist flags the cases that need confirmation.
@@ -558,11 +562,11 @@ A fourth CI job installs TeX Live, compiles the example project with XeLaTeX and
 
 **Fix:** hover the equation in the preview to read the error; correct the source in the block. The count of unparsable equations is in the checklist. Note that some valid LaTeX (e.g. certain `\operatorname` uses) is rejected by KaTeX but accepted by XeLaTeX — the export is unaffected.
 
-### 9.5 Checklist: "N MathType / Equation Editor 3.0 objects"
+### 9.5 Checklist: "N embedded OLE objects could not be converted"
 
-**Cause:** the formulas are Equation Editor 3.0 / MathType / WPS OLE objects; Word stores only a WMF preview picture.
+**Cause:** GalleyTeX could not read the embedded object or its formula format. The original preview is kept when available.
 
-**Fix:** re-enter them with *Insert → Equation* (Word can convert some with *Equation Options → Convert*), or paste each as PNG. Until then the project compiles with a placeholder box at each position.
+**Fix:** re-enter them with *Insert → Equation* (Word can convert some with *Equation Options → Convert*), or paste each as PNG. Unsupported preview images appear as placeholder boxes.
 
 ### 9.6 Checklist: "N native Word charts" or "N EMF/WMF/GIF/BMP images"
 
@@ -684,7 +688,7 @@ The recognition summary shows one line per check: `✓` passed, `!` needs attent
 | No section headings detected | no heading at all | apply heading styles in Word or retag blocks |
 | No reference list detected | no *References* heading | rename the heading or retag entries |
 | N Word equations failed to convert / N equations with LaTeX syntax errors | OMML conversion threw / KaTeX cannot parse | edit the LaTeX in the block |
-| N MathType / Equation Editor 3.0 objects | OLE formulas exported as placeholders | re-enter as OMML or paste PNG |
+| N embedded OLE objects could not be converted | an unsupported or unreadable embedded object | check its preview and re-enter as OMML or paste PNG if needed |
 | N native Word charts | charts exported as placeholders | save as PNG |
 | N EMF/WMF/GIF/BMP images | unsupported formats exported as placeholders | convert to PNG |
 | N images inside table cells | embedded at cell width | check the size after compiling |

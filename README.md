@@ -18,8 +18,9 @@ tell the author what was lost, and give a non-LaTeX author nothing they can corr
 GalleyTeX closes that loop. It converts the manuscript in the browser, shows the author every
 recognised block — headings, paragraphs, **equations as editable LaTeX**, tables, figures,
 references — next to a template-formatted preview, lets them fix what the converter got wrong
-and exports a LaTeX project. It places visible placeholders where it cannot convert legacy
-equation-editor objects, native Word charts, or metafile images. Review the checklist and
+and exports a LaTeX project. The equation converter reads Word OMML and supported WPS
+legacy formulas. Unconverted equation previews, native Word charts and unsupported image
+formats may appear as visible placeholders. Review the checklist and
 compile the exported project with XeLaTeX to verify the result.
 
 ## Two ways to run it
@@ -84,7 +85,7 @@ failed row makes the command exit nonzero after the batch.
 
 ```
 .docx ──► pre-processing (JSZip)            ──► mammoth.js ──► HTML ──► structure passes ──► review panel
-          • OMML equations → LaTeX placeholders                          • layout tables unwrapped         • editable blocks
+          • Word / WPS equations → LaTeX tokens                            • layout tables unwrapped         • editable blocks
           • native charts → placeholders                                 • heading styles by outline level • KaTeX preview
           • styles.xml → heading level map                               • bold headings promoted          • checklist
                                                                          • front matter / authors           │
@@ -100,6 +101,7 @@ failed row makes the command exit nonzero after the batch.
 | Module | File | What it does |
 |---|---|---|
 | Equation converter | `src/omml2latex.js` | OMML → LaTeX (fractions, scripts, radicals, n-ary, delimiters, matrices, accents, functions, arrays); placeholder injection into `document.xml` |
+| WPS equation decoder | `src/wps-equations.js` | WPS Equation.KSEE3 objects → LaTeX from embedded MTEF v3 data |
 | Pre-processing | `src/app.js` → `preprocessDocx`, `styleMapFromStyles` | rewrites `document.xml`, maps template heading styles (`Head1`… → `h1`…) by `outlineLvl`/`basedOn` |
 | Structure recovery | `src/app.js` → `parseAcademicDocument`, `promoteBoldHeadings`, `unwrapLayoutTables`, `fixRunInHeadings` | title/authors/abstract/keywords, headings from styles or bold text, journal layout tables, captions, references |
 | Review UI | `src/app.js` → `renderContentEditor`, `retagBlock`, `renderMathIn`; `src/i18n.js` | block-by-block editing, type drop-down, KaTeX rendering with error marking; English / Chinese interface strings |
@@ -127,8 +129,8 @@ as `\mathrm{}` and Pandoc ignores.
 
 ## Limitations
 
-- Equation editor 3.0 / MathType / WPS OLE objects are not OMML; they are placed as placeholders
-  (server-side WMF rendering or an MTEF parser are planned).
+- Legacy WPS equation support covers Equation.KSEE3 objects with supported MTEF v3 records.
+  Other embedded equation formats and unsupported records retain their available previews.
 - Native Word charts have no bitmap in the file; they become placeholders.
 - Heading promotion from bold text is a heuristic and is flagged for confirmation in the checklist.
 - The bundled template is ACM `acmart`; other templates require a template module (the generator
