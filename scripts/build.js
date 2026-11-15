@@ -26,12 +26,13 @@ if (fs.existsSync(path.join(katexDir, "katex.min.js"))) {
 }
 
 const app = read("src/app.js").replace("__ACMART_TEMPLATE_B64__", () => templateZipB64);
+const cfb = read("vendor/cfb.min.js") + "\n/* SheetJS CFB license\n" + read("vendor/CFB-LICENSE") + "\n*/\n";
 const html = template
   .replace("__STYLES__", () => read("src/styles.css") + "\n" + katexCss)
   .replace("__VENDOR_MAMMOTH__", () => read("vendor/mammoth.browser.min.js"))
-  .replace("__VENDOR_JSZIP__", () => read("vendor/jszip.min.js") + "\n" + katexJs)
+  .replace("__VENDOR_JSZIP__", () => read("vendor/jszip.min.js") + "\n" + cfb + katexJs)
   .replace("__I18N__", () => read("src/i18n.js"))
-  .replace("__APP__", () => read("src/omml2latex.js") + "\n" + app);
+  .replace("__APP__", () => read("src/omml2latex.js") + "\n" + read("src/wps-equations.js") + "\n" + app);
 
 fs.writeFileSync(out, html);
 console.log("built", path.relative(root, out), (html.length / 1024).toFixed(0) + " KB", katexJs ? "(with KaTeX)" : "(without KaTeX)");
