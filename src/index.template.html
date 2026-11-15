@@ -31,8 +31,17 @@ __STYLES__
         <button class="step" data-step="export"><b>3</b><span data-i18n="steps.export">Export</span></button>
       </nav>
 
+      <label class="document-layout">
+        <span data-i18n="venue.format">Document layout</span>
+        <select id="conferenceFormat">
+          <option value="acmsmall" data-i18n="venue.format.acmsmall">Single column (acmsmall)</option>
+          <option value="sigconf" data-i18n="venue.format.sigconf">Two columns (sigconf)</option>
+          <option value="manuscript" data-i18n="venue.format.manuscript">Single-column review (manuscript)</option>
+        </select>
+      </label>
+
       <section class="panel-section" id="importPanel">
-        <div class="section-head"><h2 data-i18n="import.heading">Import the Word manuscript</h2><span class="format-tag" data-i18n="import.formatTag">Built-in ACM single column</span></div>
+        <div class="section-head"><h2 data-i18n="import.heading">Import the Word manuscript</h2><span class="format-tag" data-i18n="import.formatTag">Built-in ACM templates</span></div>
         <div class="upload-label"><b>1</b><span><strong data-i18n="import.uploadTitle">Word manuscript</strong><small data-i18n="import.uploadHint">Body text and metadata are recognised automatically</small></span></div>
         <label class="drop-zone compact-zone" id="dropZone" tabindex="0">
           <input id="fileInput" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
@@ -53,7 +62,6 @@ __STYLES__
             <label class="wide"><span data-i18n="venue.dates">Dates</span><input id="conferenceDates" placeholder="June 03--05, 2026"></label>
             <label class="wide"><span data-i18n="venue.location">Location</span><input id="conferenceLocation" placeholder="City, Country"></label>
             <label class="wide"><span data-i18n="venue.isbn">ISBN</span><input id="conferenceIsbn" placeholder="978-1-4503-XXXX-X/2026/06"></label>
-            <label><span data-i18n="venue.format">Template variant</span><select id="conferenceFormat"><option value="acmsmall" data-i18n="venue.format.acmsmall">Final version — acmsmall (single-column proceedings)</option><option value="manuscript" data-i18n="venue.format.manuscript">Submission — manuscript (review version with line numbers)</option></select></label>
             <label><span data-i18n="venue.copyright">Rights statement \setcopyright</span><select id="conferenceCopyright"><option value="acmlicensed">acmlicensed</option><option value="acmcopyright">acmcopyright</option><option value="rightsretained">rightsretained</option><option value="cc" data-i18n="venue.copyright.cc">cc (Creative Commons)</option><option value="none" data-i18n="venue.copyright.none">none (not published by ACM)</option></select></label>
             <label class="wide checkbox-line"><input type="checkbox" id="conferenceFolios"><span data-i18n="venue.folios">Print page numbers in the final version (printfolios=true)</span></label>
           </div>
@@ -65,7 +73,7 @@ __STYLES__
           </div>
           <span class="save-state" id="conferenceSaveState" data-i18n="venue.checking">Checking browser storage…</span>
         </details>
-        <div class="notice" id="emptyNotice"><b data-i18n="import.noticeTitle">Fixed template</b><p data-i18n="import.noticeText">The ACM acmart single-column template is built in. Enter the venue details and upload the Word file; no LaTeX package needs to be uploaded.</p></div>
+        <div class="notice" id="emptyNotice"><b data-i18n="import.noticeTitle">Built-in templates</b><p data-i18n="import.noticeText">The document layout applies to the preview, browser printing and LaTeX export.</p></div>
       </section>
 
       <section class="panel-section hidden" id="reviewPanel">
@@ -116,7 +124,7 @@ __STYLES__
 
     <section class="preview-shell" data-i18n-aria="aria.preview" aria-label="Typesetting preview">
       <div class="preview-toolbar">
-          <div><strong data-i18n="preview.title">Paginated template preview</strong><span id="previewStatus">ACM manuscript single column (submission) template ready</span><span class="detected-template" id="detectedTemplate">MANUSCRIPT · SINGLE COLUMN</span></div>
+        <div><strong data-i18n="preview.title">Paginated template preview</strong><span id="previewLayoutLabel">Single column</span><span id="previewStatus">Waiting for a manuscript</span></div>
         <div class="zoom-controls"><button id="zoomOut" data-i18n-aria="preview.zoomOut" aria-label="Zoom out">−</button><span id="zoomValue">82%</span><button id="zoomIn" data-i18n-aria="preview.zoomIn" aria-label="Zoom in">＋</button></div>
       </div>
       <div class="preview-stage" id="previewStage">
@@ -135,7 +143,7 @@ __STYLES__
             <p class="citation-strip">ACM Reference Format: Author Name. 2026. Your Paper Title. In Proceedings of the Conference (Conference’26).</p>
           </header>
           <div class="paper-body" id="paperBody">
-            <section><h2>1 INTRODUCTION</h2><p>The manuscript body, figures, tables, and references will appear here in the fixed single-column <em>acmart</em> format.</p></section>
+            <section><h2>1 INTRODUCTION</h2><p>The manuscript body, figures, tables, and references will appear here after upload.</p></section>
             <section><h2>2 DOCUMENT CHECK</h2><p>After recognition, use the left panel to verify paper metadata and review any missing required fields before exporting.</p></section>
           </div>
           <aside class="permission-block"><p id="permissionNotice"></p><p id="permissionText">Conference information not yet entered</p><p id="permissionRights"></p><p id="permissionIsbn"></p><p id="permissionDoi">DOI not yet entered</p></aside>

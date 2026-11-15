@@ -71,6 +71,7 @@
   ];
 
   // Pre-filled conference; anything the user edits (including clearing a field) is saved on top of these.
+  const CONFERENCE_FORMATS = ["acmsmall", "sigconf", "manuscript"];
   const CONFERENCE_DEFAULTS = {
     name: "International Conference on Implementing Generative AI for Telecommunication and Digital Innovation 2026",
     shortName: "GAITDI 2026",
@@ -99,7 +100,7 @@
   const I18N = GalleyTeXI18N, t = I18N.t;
   I18N.setLanguage(I18N.detect());
   I18N.apply(document);
-  const state = { step: "import", file: null, templateFile: { name: "built-in acmart template" }, templateText: "", templateZip: null, templateEntries: [], templateMainPath: "main.tex", templateType: "acm", layoutMode: "single", fixedAssetsPromise: null, conference: {}, sourceHtml: "", bodyHtml: "", renderedBodyHtml: "", bodyStatsCache: null, zoom: 82, metadata: {}, authors: [], equations: [], charts: 0, oleObjects: 0, equationsDropped: 0, mathErrors: 0, citeStats: null, floatMode: "auto" };
+  const state = { step: "import", file: null, templateFile: { name: "built-in acmart template" }, templateText: "", templateZip: null, templateEntries: [], templateMainPath: "main.tex", templateType: "acm", fixedAssetsPromise: null, conference: {}, sourceHtml: "", bodyHtml: "", renderedBodyHtml: "", bodyStatsCache: null, zoom: 82, metadata: {}, authors: [], equations: [], charts: 0, oleObjects: 0, equationsDropped: 0, mathErrors: 0, citeStats: null, floatMode: "auto" };
   const els = {
     fileInput: $("fileInput"), dropZone: $("dropZone"), fileCard: $("fileCard"), fileName: $("fileName"), fileMeta: $("fileMeta"),
     emptyNotice: $("emptyNotice"), next: $("nextBtn"), back: $("backBtn"), paper: $("paper"), body: $("paperBody"),
@@ -188,11 +189,12 @@
   }
 
 
-  function conferenceFormat() { return (state.conference || {}).format === "manuscript" ? "manuscript" : "acmsmall"; }
+  function validConferenceFormat(format) { return CONFERENCE_FORMATS.includes(format) ? format : CONFERENCE_DEFAULTS.format; }
+  function conferenceFormat() { return validConferenceFormat(state.conference.format); }
   function conferenceCopyright() { const value = (state.conference || {}).copyright; return COPYRIGHT_OPTIONS.includes(value) ? value : "acmlicensed"; }
   function cleanDoi(value) { return String(value || "").trim().replace(/^https?:\/\/(?:dx\.)?doi\.org\//i, "").replace(/^doi:\s*/i, ""); }
 
-  // Mirrors samples/acmsmall-conf.tex (final single-column proceedings) or samples/acmmanuscript.tex (submission).
+  // Match the acmart class options to the selected document layout.
   function fixedTemplate() {
     const info = state.conference || {};
     const format = conferenceFormat();
@@ -207,8 +209,8 @@
     if (doi) rights.push("\\acmDOI{" + doi + "}");
     rights.push("\\acmConference[" + shortName + "]{" + name + "}{" + dates + "}{" + location + "}");
     if (info.isbn) rights.push("\\acmISBN{" + texEscape(info.isbn) + "}");
-    if (format === "acmsmall" && info.folios) rights.push("\\settopmatter{printfolios=true}");
-    const classOptions = format === "manuscript" ? "manuscript,screen,review" : "acmsmall";
+    if (format !== "manuscript" && info.folios) rights.push("\\settopmatter{printfolios=true}");
+    const classOptions = format === "manuscript" ? "manuscript,screen,review" : format;
     return String.raw`\documentclass[${classOptions}]{acmart}
 \usepackage{tabularx}
 \usepackage{multirow}
@@ -289,7 +291,7 @@ ${rights.join("\n")}
   function fillConferenceForm(info) {
     const map = { conferenceName: "name", conferenceShort: "shortName", conferenceYear: "year", conferenceDates: "dates", conferenceLocation: "location", conferenceIsbn: "isbn" };
     Object.entries(map).forEach(([id, key]) => { $(id).value = info[key] || ""; });
-    $("conferenceFormat").value = info.format === "manuscript" ? "manuscript" : "acmsmall";
+    $("conferenceFormat").value = validConferenceFormat(info.format);
     $("conferenceCopyright").value = COPYRIGHT_OPTIONS.includes(info.copyright) ? info.copyright : "acmlicensed";
     $("conferenceFolios").checked = !!info.folios;
   }
@@ -332,7 +334,7 @@ ${rights.join("\n")}
       const payload = JSON.parse(await file.text());
       const info = payload && payload.format === "ei-typesetter-conference" ? payload.conference : payload;
       if (!info || typeof info !== "object" || Array.isArray(info)) throw new Error("invalid");
-      state.conference = { name: String(info.name || ""), shortName: String(info.shortName || ""), year: String(info.year || ""), dates: String(info.dates || ""), location: String(info.location || ""), isbn: String(info.isbn || ""), format: info.format === "manuscript" ? "manuscript" : "acmsmall", copyright: COPYRIGHT_OPTIONS.includes(info.copyright) ? info.copyright : "acmlicensed", folios: !!info.folios };
+      state.conference = { name: String(info.name || ""), shortName: String(info.shortName || ""), year: String(info.year || ""), dates: String(info.dates || ""), location: String(info.location || ""), isbn: String(info.isbn || ""), format: validConferenceFormat(info.format), copyright: COPYRIGHT_OPTIONS.includes(info.copyright) ? info.copyright : "acmlicensed", folios: !!info.folios };
       fillConferenceForm(state.conference);
       const stored = saveConferenceSettings(false);
       setSaveState(stored ? "venue.state.imported" : "venue.state.importedNoStorage");
@@ -343,17 +345,16 @@ ${rights.join("\n")}
   }
 
   function applyFixedTemplate() {
-    state.layoutMode = "single";
     state.templateText = fixedTemplate();
-    els.paper.classList.add("single-column");
-    const manuscript = conferenceFormat() === "manuscript";
-    const label = t(manuscript ? "template.manuscript.label" : "template.acmsmall.label");
-    const tag = t(manuscript ? "template.manuscript.tag" : "template.acmsmall.tag");
-    $("templateClassName").textContent = label;
+    const format = conferenceFormat();
+    const templateKey = "template." + format;
+    const singleColumn = format !== "sigconf";
+    els.paper.classList.toggle("single-column", singleColumn);
+    $("templateClassName").textContent = t(templateKey + ".label");
     $("templateMainName").textContent = t("template.mainName");
-    $("detectedTemplate").textContent = tag;
-    $("exportFormatTag").textContent = tag;
-    $("previewStatus").textContent = t(state.file ? "preview.generated" : "preview.ready", { label });
+    $("exportFormatTag").textContent = t(templateKey + ".tag");
+    $("previewLayoutLabel").textContent = t(singleColumn ? "preview.columns.single" : "preview.columns.double");
+    $("previewStatus").textContent = t(state.file ? "preview.generated" : "preview.ready");
     applyTemplatePreview("acm", state.templateText);
   }
 
@@ -440,7 +441,6 @@ ${rights.join("\n")}
       const entry = zip.file("word/document.xml");
       if (!entry) return out;
       let xml = await entry.async("string");
-      out.oleObjects = (xml.match(/<w:object[\s>]/g) || []).length;
       // Native charts / SmartArt carry no bitmap; keep their position with a placeholder run.
       const chartPlaceholder = (block) => {
         if (!/<c:chart[\s>]|<dgm:relIds[\s>]/.test(block)) return block;
@@ -449,13 +449,27 @@ ${rights.join("\n")}
       };
       xml = xml.replace(/<mc:AlternateContent>[\s\S]*?<\/mc:AlternateContent>/g, chartPlaceholder);
       xml = xml.replace(/<w:drawing>[\s\S]*?<\/w:drawing>/g, chartPlaceholder);
-      // Word equations (OMML) -> LaTeX, leaving a placeholder run at the equation's position.
-      if (/<m:oMath[\s>]/.test(xml) && typeof OMML2LaTeX !== "undefined") {
+      // Keep both OMML and WPS equations in their original positions when converting through mammoth.
+      const mathTag = /<(?:[\w.-]+:)?oMath[\s/>]/g;
+      const objectTag = /<(?:[\w.-]+:)?object[\s/>]/g;
+      const objectCount = (xml.match(objectTag) || []).length;
+      const mathCount = (xml.match(mathTag) || []).length;
+      out.oleObjects = objectCount;
+      if (mathCount || objectCount) {
         try {
-          const prepared = OMML2LaTeX.prepareDocumentXml(xml);
-          xml = prepared.xml;
-          out.equations = prepared.equations;
-        } catch (error) { console.error("OMML conversion failed", error); out.failed = (xml.match(/<m:oMath[\s>]/g) || []).length; }
+          const doc = OMML2LaTeX.parseXml(xml);
+          const objects = Array.from(doc.getElementsByTagNameNS(W_NS, "object"));
+          const legacyEquations = await WpsEquations.readDocument(zip, objects).catch((error) => {
+            console.warn("Could not read embedded equations:", error.message);
+            return new Map();
+          });
+          if (mathCount || legacyEquations.size) {
+            const prepared = OMML2LaTeX.prepareDocument(doc, legacyEquations);
+            xml = prepared.xml;
+            out.equations = prepared.equations;
+          }
+          out.oleObjects = objects.filter((object) => object.parentNode !== null).length;
+        } catch (error) { console.error("Equation conversion failed", error); out.failed = mathCount; }
       }
       const stylesEntry = zip.file("word/styles.xml");
       if (stylesEntry) out.styleMap = styleMapFromStyles(await stylesEntry.async("string"));
@@ -1540,7 +1554,7 @@ ${rights.join("\n")}
   const UNSUPPORTED_IMAGE_RE = /\.(wmf|emf|gif|bmp|tif|tiff|svg)$/i;
   function imageToLatex(img) {
     const file = "figures/" + img.dataset.latexName;
-    const w = Number(img.dataset.w) || 0, h = Number(img.dataset.h) || 0;
+    const h = Number(img.dataset.h) || 0;
     const pt = (px) => Math.round(px * 72 / 96 * 10) / 10;
     if (img.classList.contains("img-cell")) {
       // inside a tabularx cell: no float environment, never wider than the cell, never taller than ~4 cm
@@ -1563,9 +1577,9 @@ ${rights.join("\n")}
       return numbered ? "\n\\begin{equation}\n\\includegraphics[" + size + "]{" + file + "}\n\\end{equation}\n" : "\n\\[\n\\includegraphics[" + size + "]{" + file + "}\n\\]\n";
     }
     const caption = img.__caption || img.alt || "Figure caption";
-    const widthSpec = !w || pt(w) >= 300 ? "width=\\linewidth" : "width=" + pt(w) + "pt";
     const label = uniqueLabel("fig:" + (img.dataset.latexName || "figure").replace(/\.[^.]+$/, ""));
-    return "\n\\begin{figure}[" + floatPlacement() + "]\n\\centering\n\\includegraphics[" + widthSpec + "]{" + file + "}\n\\caption{" + texEscape(caption) + "}\n\\Description{" + texEscape(caption) + "}\n\\label{" + label + "}\n\\end{figure}\n";
+    const width = conferenceFormat() === "sigconf" ? "\\linewidth" : "0.5\\linewidth";
+    return "\n\\begin{figure}[" + floatPlacement() + "]\n\\centering\n\\includegraphics[width=" + width + "]{" + file + "}\n\\caption{" + texEscape(caption) + "}\n\\Description{" + texEscape(caption) + "}\n\\label{" + label + "}\n\\end{figure}\n";
   }
 
   function floatPlacement() { return state.floatMode === "here" ? "H" : "!htbp"; }
@@ -1644,7 +1658,9 @@ ${rights.join("\n")}
     const label = uniqueLabel("tab:table" + state.tableCounter);
     if (grid.length > 18) {
       // long table: break across pages in place instead of blocking every float behind it
-      return "\n\\begin{xltabular}{\\linewidth}{" + colSpec + "}\n\\caption{" + texEscape(caption) + "}\\label{" + label + "}\\\\\n\\hline\n" + lines.join("\n") + "\n\\end{xltabular}\n";
+      const longTable = "\n\\begin{xltabular}{\\linewidth}{" + colSpec + "}\n\\caption{" + texEscape(caption) + "}\\label{" + label + "}\\\\\n\\hline\n" + lines.join("\n") + "\n\\end{xltabular}\n";
+      // The underlying longtable environment needs full-width pages in a two-column document.
+      return conferenceFormat() === "sigconf" ? "\n\\onecolumn\n" + longTable + "\\twocolumn\n" : longTable;
     }
     return "\n\\begin{table}[" + floatPlacement() + "]\n\\caption{" + texEscape(caption) + "}\n\\label{" + label + "}\n\\begin{tabularx}{\\linewidth}{" + colSpec + "}\n\\hline\n" + lines.join("\n") + "\n\\end{tabularx}\n\\end{table}\n";
   }
@@ -1694,7 +1710,8 @@ ${rights.join("\n")}
     zip.file(state.templateMainPath, buildLatex());
     updateChecks();
     const mainDir = state.templateMainPath.includes("/") ? state.templateMainPath.slice(0, state.templateMainPath.lastIndexOf("/") + 1) : "";
-    zip.file(mainDir + "WORD-CONVERSION-NOTES.txt", "Generated locally from Word with the bundled acmart v2.20 template.\nMain file: " + state.templateMainPath + "\nLayout: " + (conferenceFormat() === "manuscript" ? "manuscript (submission/review, line numbers)" : "acmsmall single-column proceedings (samples/acmsmall-conf.tex)") + "\n\nCOMPILE WITH XELATEX: run `latexmk main.tex` (the bundled latexmkrc selects XeLaTeX) or choose XeLaTeX in TeXstudio.\npdflatex fails on Unicode symbols; plain xelatex without libertine/newtxmath installed silently drops some glyphs, so install the full TeX Live scheme.\n\nReview before submission: equations (converted from Word, check the LaTeX), captions, citations (linked to the reference list where they matched), tables with merged cells (multirow), and the rights block.\n");
+    const layout = { acmsmall: "acmsmall (single column)", sigconf: "sigconf (two columns)", manuscript: "manuscript (single-column review)" }[conferenceFormat()];
+    zip.file(mainDir + "WORD-CONVERSION-NOTES.txt", "Generated locally from Word with the bundled acmart v2.20 template.\nMain file: " + state.templateMainPath + "\nLayout: " + layout + "\n\nCOMPILE WITH XELATEX: run `latexmk main.tex` (the bundled latexmkrc selects XeLaTeX) or choose XeLaTeX in TeXstudio.\npdflatex fails on Unicode symbols; plain xelatex without libertine/newtxmath installed silently drops some glyphs, so install the full TeX Live scheme.\n\nReview before submission: equations (converted from Word, check the LaTeX), captions, citations (linked to the reference list where they matched), tables with merged cells (multirow), and the rights block.\n");
     zip.file(mainDir + "latexmkrc", "# Compile with XeLaTeX\n$pdf_mode = 5;\n$xelatex = 'xelatex -interaction=nonstopmode -synctex=1 %O %S';\n$clean_ext = 'synctex.gz';\n");
     zip.file(mainDir + "build.bat", "@echo off\r\nlatexmk -xelatex -interaction=nonstopmode main.tex\r\npause\r\n");
     // unixPermissions: without it the shebang is useless — the file unzips as 0644 and `./build.sh` fails
@@ -1712,6 +1729,8 @@ ${rights.join("\n")}
 
   function prepareLocalPdf() {
     flushContentEdit();
+    clearTimeout(paginationTimer);
+    paginatePreview();
     document.title = safeBaseName((state.file && state.file.name) || "paper") + "-PDF";
     let style = $("dynamicPrintPage");
     if (!style) { style = document.createElement("style"); style.id = "dynamicPrintPage"; document.head.appendChild(style); }
@@ -1753,7 +1772,8 @@ ${rights.join("\n")}
     const createPage = (firstPage) => {
       pageNumber++;
       const page = document.createElement("article");
-      page.className = "paper single-column preview-page " + (firstPage ? "first-page" : "continuation-page");
+      page.className = "paper preview-page " + (firstPage ? "first-page" : "continuation-page");
+      page.classList.toggle("single-column", source.classList.contains("single-column"));
       const running = source.querySelector(".paper-running").cloneNode(true);
       page.appendChild(running);
       if (firstPage) page.appendChild(source.querySelector(".paper-front").cloneNode(true));

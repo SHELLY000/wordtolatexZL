@@ -286,12 +286,12 @@
   const insideMath = (n) => { for (let a = n.parentNode; a && a.nodeType === 1; a = a.parentNode) if (isM(a)) return true; return false; };
   // A run holding nothing but text / tabs / field markers (no footnote references, drawings, deleted text, ...).
   const isPlainTextRun = (r) => Array.from(r.childNodes).every((n) => n.nodeType !== 1 || (isW(n) && /^(rPr|t|tab|fldChar|instrText|softHyphen|noBreakHyphen)$/.test(n.localName)));
-  function mathNodesOf(wP) {
+  function mathNodesOf(wP, legacyEquations) {
     const out = [];
     (function walk(n) {
       for (let c = n.firstChild; c; c = c.nextSibling) {
         if (c.nodeType !== 1) continue;
-        if (isM(c) && (c.localName === "oMathPara" || c.localName === "oMath")) out.push(c);
+        if (legacyEquations?.has(c) || (isM(c) && (c.localName === "oMathPara" || c.localName === "oMath"))) out.push(c);
         else if (!isM(c)) walk(c);
       }
     })(wP);
@@ -309,8 +309,8 @@
   }
   const EQNUM_RE = /^\s*[\(（]\s*([0-9]+[a-z]?(?:[.\-][0-9]+)?)\s*[\)）]\s*$/;
   let counter = 0;
-  function convertParagraph(wP) {
-    const nodes = mathNodesOf(wP);
+  function convertParagraph(wP, legacyEquations) {
+    const nodes = mathNodesOf(wP, legacyEquations);
     if (!nodes.length) return [];
     const rest = otherText(wP, nodes);
     const numbered = nodes.length === 1 && EQNUM_RE.test(rest);
@@ -319,7 +319,8 @@
     return nodes.map((node) => {
       // equations inside table cells are always set inline: \[ \] inside a tabular cell breaks the row layout
       const display = !inTableCell && (node.localName === "oMathPara" || numbered || paraIsMathOnly);
-      return { id: ++counter, node, latex: ommlToLatex(node), display, tag: numbered ? rest.match(EQNUM_RE)[1] : null };
+      const latex = legacyEquations?.get(node) ?? ommlToLatex(node);
+      return { id: ++counter, node, latex, display, tag: numbered ? rest.match(EQNUM_RE)[1] : null };
     });
   }
   function wrapLatex(eq) {
@@ -357,29 +358,36 @@
   }
   // Replace each equation with a placeholder run so mammoth preserves its position in the HTML.
   function prepareDocumentXml(documentXml) {
+    return prepareDocument(parseXml(documentXml));
+  }
+
+  function prepareDocument(doc, legacyEquations) {
     counter = 0;
-    const doc = parseXml(documentXml);
     const equations = [];
     for (const p of paragraphsOf(doc)) {
-      const eqs = convertParagraph(p);
+      const eqs = convertParagraph(p, legacyEquations);
       for (const e of eqs) {
         equations.push({ id: e.id, latex: e.latex, display: e.display, tag: e.tag, wrapped: wrapLatex(e) });
-        const r = doc.createElementNS(W_NS, "w:r");
         const t = doc.createElementNS(W_NS, "w:t");
         t.setAttribute("xml:space", "preserve");
         t.appendChild(doc.createTextNode("\uE000EQ" + e.id + "\uE000"));
-        r.appendChild(t);
         // A numbered equation: the paragraph's whole non-math text is just "(1)" (that is what set `tag`), but Word usually splits it
         // over several runs ("(", "1", ")", a tab, or a SEQ field), so drop every plain run outside the math rather than looking for one that matches.
         if (e.tag) {
           for (const w of Array.from(p.getElementsByTagNameNS(W_NS, "r"))) { if (!insideMath(w) && isPlainTextRun(w)) w.parentNode.removeChild(w); }
         }
-        e.node.parentNode.replaceChild(r, e.node);
+        const parent = e.node.parentNode;
+        if (isW(parent) && parent.localName === "r") parent.replaceChild(t, e.node);
+        else {
+          const r = doc.createElementNS(W_NS, "w:r");
+          r.appendChild(t);
+          parent.replaceChild(r, e.node);
+        }
       }
     }
     const xml = new dom.XMLSerializer().serializeToString(doc);
     return { xml, equations };
   }
 
-  return { ommlToLatex, convertParagraph, extractEquations, prepareDocumentXml, wrapLatex, setDomImplementation, PLACEHOLDER_RE, M_NS, W_NS };
+  return { ommlToLatex, convertParagraph, extractEquations, prepareDocumentXml, prepareDocument, parseXml, wrapLatex, setDomImplementation, charToLatex, joinTokens, isMathFunction: (name) => FUNCTIONS.includes(name), PLACEHOLDER_RE, M_NS, W_NS };
 });
