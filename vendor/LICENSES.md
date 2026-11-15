@@ -4,6 +4,7 @@
 |---|---|---|---|
 | [mammoth.js](https://github.com/mwilliamson/mammoth.js) | 1.x (browser bundle) | BSD-2-Clause | .docx → HTML |
 | [JSZip](https://stuk.github.io/jszip/) | 3.10.1 | MIT (or GPLv3) | reading/writing .docx and the exported project |
+| [SheetJS CFB](https://www.npmjs.com/package/cfb) | 1.2.2 | Apache-2.0 | reading embedded WPS equation streams |
 | [KaTeX](https://katex.org/) | 0.16.x | MIT | rendering the converted equations in the preview |
 | [acmart](https://github.com/borisveytsman/acmart) | 2.20 | LPPL 1.3c | bundled LaTeX template (templates/acmart-template.zip) |
 
